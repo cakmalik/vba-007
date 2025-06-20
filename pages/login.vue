@@ -49,10 +49,10 @@ const signInWithGoogle = async () => {
 
 <template>
   <div class="max-w-md mx-auto mt-10 p-6 border rounded-xl shadow-md space-y-4 bg-white dark:bg-gray-900">
-    <UInput v-model="email" type="email" placeholder="Enter your email" icon="i-heroicons-envelope" size="lg"
-      :disabled="countdown > 0" />
+    <!-- <UInput v-model="email" type="email" placeholder="Enter your email" icon="i-heroicons-envelope" size="lg" -->
+    <!--   :disabled="countdown > 0" /> -->
 
-    <UButton label="Sign In with Email" block :loading="countdown > 0" @click="signInWithOtp" />
+    <!-- <UButton label="Sign In with Email" block :loading="countdown > 0" @click="signInWithOtp" /> -->
 
     <UButton label="Sign In with Google" block icon="i-simple-icons-google" color="red" variant="soft"
       @click="signInWithGoogle" />
