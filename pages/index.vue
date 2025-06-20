@@ -21,25 +21,37 @@ const router = useRouter()
 onMounted(async () => {
   if (!user.value) return
 
-  const { data: profile, error } = await supabase
+  const { data, error } = await supabase
     .from('profiles')
-    .select('id')
+    .select('user_id')
     .eq('user_id', user.value.id)
     .single()
+
+  console.log(data, 'profile')
+  console.log('user_id:', user.value.id)
+  console.log('user_value_id:', user.value.id)
+  console.log(error, 'error')
 
   if (error && error.code === 'PGRST116') {
     const { error: insertError } = await supabase.from('profiles').insert({
       user_id: user.value.id,
       nickname: 'Bendahara',
       full_name: user.value.user_metadata.full_name,
-      role: user.value.email === 'hasinilmalik@gmail.com' ? 'treasurer' : 'resident'
+      role: user.value.email === 'hasinilmalik@gmail.com' ? 'treasurer' : 'resident',
+      house_number: '-',
+      phone_number: '-',
     })
 
     if (insertError) {
       console.error('Gagal insert profile:', insertError)
     } else {
       console.log('Profile berhasil dibuat.')
+      router.push('/dashboard')
     }
+  }
+
+  if (data) {
+    router.push('/dashboard')
   }
 })
 
