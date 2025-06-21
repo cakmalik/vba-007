@@ -1,76 +1,120 @@
 <script setup lang="ts">
+import { ref, watchEffect } from 'vue'
+import { useRoute } from 'vue-router'
 import type { NavigationMenuItem } from '@nuxt/ui'
+
+const route = useRoute()
 
 const items = ref<NavigationMenuItem[][]>([
   [
     {
-      label: 'Guide',
+      icon: 'i-lucide-house',
+      to: '/dashboard',
+      active: false
+    },
+    {
+      label: 'Data',
       icon: 'i-lucide-book-open',
       children: [
         {
-          label: 'Introduction',
-          description: 'Fully styled and customizable components for Nuxt.',
-          icon: 'i-lucide-house'
+          label: 'Warga',
+          description: 'Kelola Data Warga',
+          icon: 'i-lucide-users',
+          to: '/resident',
+          active: false
         },
         {
-          label: 'Installation',
-          description: 'Learn how to install and configure Nuxt UI in your application.',
-          icon: 'i-lucide-cloud-download'
+          label: 'Nomor Rumah',
+          description: 'Kelola Nomor Rumah',
+          icon: 'i-lucide-home',
+          to: '/nomor-rumah',
+          active: false
         },
         {
-          label: 'Icons',
-          icon: 'i-lucide-smile',
-          description: 'You have nothing to do, @nuxt/icon will handle it automatically.'
-        },
-        {
-          label: 'Colors',
-          icon: 'i-lucide-swatch-book',
-          description: 'Choose a primary and a neutral color from your Tailwind CSS theme.'
-        },
-        {
-          label: 'Theme',
-          icon: 'i-lucide-cog',
-          description:
-            'You can customize components by using the `class` / `ui` props or in your app.config.ts.'
+          label: 'Kategori Blok',
+          description: 'Kelola Kategori Blok Perumahan',
+          icon: 'i-lucide-grid',
+          to: '/kategori-blok',
+          active: false
         }
-      ]
+      ],
+      active: false
     },
     {
-      label: 'Composables',
+      label: 'Keuangan',
       icon: 'i-lucide-database',
       children: [
         {
-          label: 'defineShortcuts',
+          label: 'Pembayaran',
+          description: 'Kelola Pembayaran Iuran warga',
           icon: 'i-lucide-file-text',
-          description: 'Define shortcuts for your application.',
-          to: '/composables/define-shortcuts'
+          to: '/pembayaran',
+          active: false
         },
         {
-          label: 'useOverlay',
-          icon: 'i-lucide-file-text',
-          description: 'Display a modal/slideover within your application.',
-          to: '/composables/use-overlay'
+          label: 'Kas',
+          description: 'Kelola Keluar masuk kas',
+          icon: 'i-lucide-dollar-sign',
+          to: '/kas',
+          active: false
         },
         {
-          label: 'useToast',
-          icon: 'i-lucide-file-text',
-          description: 'Display a toast within your application.',
-          to: '/composables/use-toast'
+          label: 'Kategori Pembayaran',
+          description: 'Kelola Kategori Pembayaran',
+          icon: 'i-lucide-tags',
+          to: '/kategori-pembayaran',
+          active: false
         }
-      ]
-    },
-
+      ],
+      active: false
+    }
   ],
   [
     {
       label: 'Help',
       icon: 'i-lucide-circle-help',
+      to: '/help',
+      active: false
     }
   ]
 ])
+
+// 🔁 Update `active` status saat route berubah
+watchEffect(() => {
+  const currentPath = route.path
+
+  for (const group of items.value) {
+    for (const item of group) {
+      // Reset active state dulu
+      item.active = false
+
+      // Cek apakah parent punya to
+      if (item.to && item.to === currentPath) {
+        item.active = true
+      }
+
+      // Cek child items
+      if (item.children) {
+        let anyChildActive = false
+
+        for (const child of item.children) {
+          child.active = child.to === currentPath
+
+          if (child.active) {
+            anyChildActive = true
+          }
+        }
+
+        if (anyChildActive) {
+          item.active = true
+        }
+      }
+    }
+  }
+})
 </script>
 
 <template>
   <UNavigationMenu highlight highlight-color="primary" orientation="horizontal" :items="items"
-    class="data-[orientation=horizontal]:border-b border-default data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-48" />
+    class="data-[orientation=horizontal]:border-b border-default data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-48 sticky top-0 bg-black" />
 </template>
