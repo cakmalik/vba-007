@@ -11,7 +11,7 @@
         </h1>
 
         <!-- Avatar -->
-        <UButton variant="ghost" size="lg" icon="i-heroicons-user-circle text-3xl" />
+        <!-- <UButton variant="ghost" size="lg" icon="i-heroicons-user-circle text-3xl" /> -->
       </header>
 
       <!-- Page Content -->

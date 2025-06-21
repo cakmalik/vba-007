@@ -27,14 +27,14 @@ const items = ref<NavigationMenuItem[][]>([
           label: 'Nomor Rumah',
           description: 'Kelola Nomor Rumah',
           icon: 'i-lucide-home',
-          to: '/nomor-rumah',
+          to: '/resident/house-number',
           active: false
         },
         {
           label: 'Kategori Blok',
           description: 'Kelola Kategori Blok Perumahan',
           icon: 'i-lucide-grid',
-          to: '/kategori-blok',
+          to: '/resident/block-category',
           active: false
         }
       ],
@@ -69,14 +69,14 @@ const items = ref<NavigationMenuItem[][]>([
       active: false
     }
   ],
-  [
-    {
-      label: 'Help',
-      icon: 'i-lucide-circle-help',
-      to: '/help',
-      active: false
-    }
-  ]
+  // [
+  //   {
+  //     label: 'Help',
+  //     icon: 'i-lucide-circle-help',
+  //     to: '/help',
+  //     active: false
+  //   }
+  // ]
 ])
 
 // 🔁 Update `active` status saat route berubah
@@ -116,5 +116,5 @@ watchEffect(() => {
 
 <template>
   <UNavigationMenu highlight highlight-color="primary" orientation="horizontal" :items="items"
-    class="data-[orientation=horizontal]:border-b border-default data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-48 sticky top-0 bg-black" />
+    class="z-50 data-[orientation=horizontal]:border-b border-default data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-48 sticky top-0 bg-black" />
 </template>
