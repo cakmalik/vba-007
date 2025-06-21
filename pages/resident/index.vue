@@ -41,7 +41,7 @@ const { data: residentData, refresh, pending } = await useAsyncData(
   async () => {
     const { data, error } = await supabase
       .from('profiles')
-      .select('*', { count: 'exact' })
+      .select(`*,house_number(name)`, { count: 'exact' })
       .eq('role', 'resident')
       .ilike('full_name', `%${globalFilter.value}%`)
       .range(from.value, to.value)
@@ -86,10 +86,18 @@ const columns: TableColumn<Resident>[] = [
           })
         ]),
         h('div', undefined, [
-          h('div', undefined, row.original.full_name),
-          h('div', undefined, row.original.nickname),
+          h('div', { class: 'uppercase' }, row.original.full_name),
+          h('div', { class: 'text-sm text-muted capitalize' }, row.original.nickname),
         ]),
       ])
+    }
+  },
+  {
+    accessorKey: 'house_number',
+    header: 'Nomor Rumah',
+    cell: ({ row }) => {
+      const houses = row.original.house_number
+      return houses.map((house: any) => house.name).join(', ')
     }
   },
   // {
