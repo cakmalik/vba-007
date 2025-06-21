@@ -1,28 +1,21 @@
 <template>
-  <admin-navigation />
-  <div class=" w-full min-h-screen bg-dark text-neutral-200 overflow-auto">
+  <div class="min-h-screen bg-dark text-neutral-200 flex flex-col">
+    <!-- Navigation -->
+    <admin-navigation />
 
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col">
+    <!-- Main Layout -->
+    <div class="flex-1 flex flex-col items-center px-4 sm:px-6 lg:px-8">
+
       <!-- Header -->
-      <header class=" mx-auto max-w-5xl flex items-center justify-between px-6 py-4 border-b border-gray-200">
-        <div class="flex flex-col">
-          <h1 class="text-md sm:text-xl font-semibold">
-            {{ pageTitle }}
-          </h1>
-          <!-- subtitle -->
-          <h2 class="text-sm text-gray-500">
-            {{ subtitle }}
-          </h2>
-        </div>
-        <!-- Avatar -->
-        <!-- <UButton variant="ghost" size="lg" icon="i-heroicons-user-circle text-3xl" /> -->
+      <header class="w-full max-w-5xl  py-4 mb-4 text-center">
+        <h1 class="text-xl font-semibold">{{ pageTitle }}</h1>
+        <p v-if="subtitle" class="text-sm text-gray-400 mt-1">{{ subtitle }}</p>
       </header>
 
       <!-- Page Content -->
-      <UContainer class="py-3 max-w-5xl">
+      <div class="w-full max-w-5xl flex-1">
         <slot />
-      </UContainer>
+      </div>
     </div>
   </div>
 </template>
@@ -30,13 +23,6 @@
 <script setup lang="ts">
 const route = useRoute()
 
-// Tentukan halaman aktif berdasarkan route
-const pageTitle = computed(() => {
-  return route.meta.title || 'Dashboard'
-})
-
-const subtitle = computed(() => {
-  return route.meta.subtitle || ''
-})
-
+const pageTitle = computed(() => route.meta.title || 'Dashboard')
+const subtitle = computed(() => route.meta.subtitle || '')
 </script>

@@ -9,7 +9,7 @@
 
     <div class="flex items-center justify-between mt-4">
       <UButton :disabled="page <= 1 || pending" @click="prevPage" icon="i-heroicons-chevron-left" />
-      <span>Halaman {{ page }}</span>
+      <span>Hal {{ page }}</span>
       <UButton :disabled="!hasNextPage || pending" @click="nextPage" icon="i-heroicons-chevron-right" />
     </div>
   </NuxtLayout>
