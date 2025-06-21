@@ -115,6 +115,6 @@ watchEffect(() => {
 </script>
 
 <template>
-  <UNavigationMenu highlight highlight-color="primary" orientation="horizontal" :items="items"
-    class="z-50 data-[orientation=horizontal]:border-b border-default data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-48 sticky top-0 bg-black" />
+  <UNavigationMenu highlight highlight-color="primary" orientation="horizontal" :items="items" color="primary"
+    class="z-50 data-[orientation=horizontal]:border-b border-default data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-48 sticky top-0 bg-dark" />
 </template>

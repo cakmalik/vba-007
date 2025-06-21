@@ -39,7 +39,6 @@ const { data: houseData, refresh, pending } = await useAsyncData(
       .range(from.value, to.value)
 
     if (error) throw error
-
     hasNextPage.value = data.length === pageSize
     return data
   }

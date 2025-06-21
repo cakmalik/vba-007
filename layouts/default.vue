@@ -1,11 +1,11 @@
 <template>
   <admin-navigation />
-  <div class="container min-h-screen bg-dark text-neutral-200 overflow-auto">
+  <div class=" w-full min-h-screen bg-dark text-neutral-200 overflow-auto">
 
     <!-- Main Content -->
     <div class="flex-1 flex flex-col">
       <!-- Header -->
-      <header class="flex  items-center justify-between px-6 py-4 border-b border-gray-200">
+      <header class=" mx-auto max-w-5xl flex items-center justify-between px-6 py-4 border-b border-gray-200">
         <div class="flex flex-col">
           <h1 class="text-md sm:text-xl font-semibold">
             {{ pageTitle }}
@@ -20,7 +20,7 @@
       </header>
 
       <!-- Page Content -->
-      <UContainer class="py-3">
+      <UContainer class="py-3 max-w-5xl">
         <slot />
       </UContainer>
     </div>
