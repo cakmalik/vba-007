@@ -19,5 +19,8 @@ export default defineNuxtConfig({
     theme: {
       transitions: true
     }
-  }
+  },
+  // image: {
+  //   provider: 'none' // atau disable sepenuhnya
+  // }
 })

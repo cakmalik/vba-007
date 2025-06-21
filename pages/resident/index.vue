@@ -1,10 +1,8 @@
 <template>
   <NuxtLayout>
     <div class="relative">
-      <UTable :data="residentData" :columns="columns" />
-      <div v-if="pending" class="absolute inset-0 bg-dark/70 backdrop-blur-sm flex items-center justify-center z-10">
-        <span class="text-white text-sm">Memuat data...</span>
-      </div>
+      <UTable :data="residentData" :columns="columns" :loading="pending" loading-color="primary"
+        loading-animation="carousel" />
     </div>
 
     <div class="flex items-center justify-between mt-4">
@@ -16,6 +14,10 @@
 </template>
 
 <script setup lang="ts">
+import type { TableColumn } from '@nuxt/ui'
+
+const UAvatar = resolveComponent('UAvatar')
+
 definePageMeta({
   title: 'Data Warga',
   subtitle: 'Kelola Data Warga RT007'
@@ -38,6 +40,7 @@ const { data: residentData, refresh, pending } = await useAsyncData(
       .select('*', { count: 'exact' })
       .range(from.value, to.value)
 
+    console.log('daata', data)
     if (error) throw error
     hasNextPage.value = data.length === pageSize
     return data
@@ -48,20 +51,46 @@ const { data: residentData, refresh, pending } = await useAsyncData(
 type Resident = {
   full_name: string,
   nickname: string,
-  phone_number: string
+  phone_number: string,
+  image_url?: string
+}
+const getProxyImageUrl = (url?: string) => {
+  if (!url) return ''
+  const match = url.match(/(?:id=|\/d\/)([a-zA-Z0-9_-]+)/)
+  const fileId = match?.[1]
+  return fileId ? `/api/image/${fileId}` : ''
 }
 
 const columns: TableColumn<Resident>[] = [
   {
     accessorKey: 'full_name',
-    header: 'Nama Lengkap',
-    cell: ({ row }) => row.getValue('full_name'),
+    header: 'Nama Warga',
+    cell: ({ row }) => {
+
+      const avatarSrc =
+        getProxyImageUrl(row.original.image_url) ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(row.original.full_name)}`
+
+      return h('div', { class: 'flex items-center gap-3' }, [
+        h('div', { class: 'w-8 h-8 rounded-full overflow-hidden' }, [
+          h('img', {
+            src: avatarSrc,
+            alt: row.original.full_name,
+            class: 'w-full h-full object-cover'
+          })
+        ]),
+        h('div', undefined, [
+          h('div', undefined, row.original.full_name),
+          h('div', undefined, row.original.nickname),
+        ]),
+      ])
+    }
   },
-  {
-    accessorKey: 'nickname',
-    header: 'Nama Panggilan',
-    cell: ({ row }) => row.getValue('nickname'),
-  },
+  // {
+  //   accessorKey: 'nickname',
+  //   header: 'Nama Panggilan',
+  //   cell: ({ row }) => row.getValue('nickname'),
+  // },
   {
     accessorKey: 'phone_number',
     header: 'Nomor Telepon',

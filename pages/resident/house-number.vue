@@ -1,10 +1,8 @@
 <template>
   <NuxtLayout>
     <div class="relative">
-      <UTable :data="houseData" :columns="columns" />
-      <div v-if="pending" class="absolute inset-0 bg-dark/70 backdrop-blur-sm flex items-center justify-center z-10">
-        <span class="text-white text-sm">Memuat data...</span>
-      </div>
+      <UTable :data="houseData" :columns="columns" :loading="pending" loading-color="primary"
+        loading-animation="carousel" />
     </div>
 
     <div class="flex items-center justify-between mt-4">
