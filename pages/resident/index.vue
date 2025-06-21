@@ -43,7 +43,8 @@ const { data: residentData, refresh, pending } = await useAsyncData(
       .from('profiles')
       .select(`*,house_number(name)`, { count: 'exact' })
       .eq('role', 'resident')
-      .ilike('full_name', `%${globalFilter.value}%`)
+      // .ilike('full_name', `%${globalFilter.value}%`)
+      .or(`full_name.ilike.%${globalFilter.value}%,phone_number.ilike.%${globalFilter.value}%`)
       .range(from.value, to.value)
 
     console.log('daata', data)
@@ -92,14 +93,6 @@ const columns: TableColumn<Resident>[] = [
       ])
     }
   },
-  {
-    accessorKey: 'house_number',
-    header: 'Nomor Rumah',
-    cell: ({ row }) => {
-      const houses = row.original.house_number
-      return houses.map((house: any) => house.name).join(', ')
-    }
-  },
   // {
   //   accessorKey: 'nickname',
   //   header: 'Nama Panggilan',
@@ -109,6 +102,14 @@ const columns: TableColumn<Resident>[] = [
     accessorKey: 'phone_number',
     header: 'Nomor Telepon',
     cell: ({ row }) => row.getValue('phone_number'),
+  },
+  {
+    accessorKey: 'house_number',
+    header: 'Nomor Rumah',
+    cell: ({ row }) => {
+      const houses = row.original.house_number
+      return houses.map((house: any) => house.name).join(', ')
+    }
   },
 ]
 

@@ -45,12 +45,26 @@ const items = ref<NavigationMenuItem[][]>([
       icon: 'i-lucide-database',
       children: [
         {
-          label: 'Pembayaran',
-          description: 'Kelola Pembayaran Iuran warga',
-          icon: 'i-lucide-file-text',
-          to: '/pembayaran',
+          label: 'Iuran',
+          description: 'Kelola Iuran Bulanan',
+          icon: 'i-lucide-tags',
+          to: '/dues/history',
           active: false
         },
+        {
+          label: 'Periode Iuran',
+          description: 'Kelola Periode Iuran Bulanan',
+          icon: 'i-lucide-tags',
+          to: '/dues/period',
+          active: false
+        },
+        // {
+        //   label: 'Pembayaran',
+        //   description: 'Kelola Pembayaran Iuran warga',
+        //   icon: 'i-lucide-file-text',
+        //   to: '/pembayaran',
+        //   active: false
+        // },
         {
           label: 'Kas',
           description: 'Kelola Keluar masuk kas',
@@ -58,13 +72,6 @@ const items = ref<NavigationMenuItem[][]>([
           to: '/kas',
           active: false
         },
-        {
-          label: 'Kategori Pembayaran',
-          description: 'Kelola Kategori Pembayaran',
-          icon: 'i-lucide-tags',
-          to: '/kategori-pembayaran',
-          active: false
-        }
       ],
       active: false
     }

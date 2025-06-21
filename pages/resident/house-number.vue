@@ -33,7 +33,7 @@ const { data: houseData, refresh, pending } = await useAsyncData(
   async () => {
     const { data, error } = await supabase
       .from('house_number')
-      .select('name', { count: 'exact' })
+      .select(`name, profiles(full_name)`, { count: 'exact' })
       .range(from.value, to.value)
 
     if (error) throw error
@@ -53,7 +53,15 @@ const columns: TableColumn<HouseNumber>[] = [
     accessorKey: 'name',
     header: 'Nomor Rumah',
     cell: ({ row }) => row.getValue('name'),
-  }
+  },
+  {
+    accessorKey: 'profiles',
+    header: 'Nama Warga',
+    cell: ({ row }) => {
+      const profiles = row.original.profiles
+      return profiles?.full_name ?? ''
+    }
+  },
 ]
 
 // Pagination
