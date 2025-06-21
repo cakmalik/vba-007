@@ -1,13 +1,16 @@
 <template>
   <NuxtLayout>
-    <UTable :data="houseData" :columns="columns" />
-    <div v-if="pending" class="absolute inset-0 bg-dark/70 backdrop-blur-sm flex items-center justify-center z-10">
-      <span class="text-white text-sm">Memuat data...</span>
+    <div class="relative">
+      <UTable :data="houseData" :columns="columns" />
+      <div v-if="pending" class="absolute inset-0 bg-dark/70 backdrop-blur-sm flex items-center justify-center z-10">
+        <span class="text-white text-sm">Memuat data...</span>
+      </div>
     </div>
+
     <div class="flex items-center justify-between mt-4">
-      <UButton :disabled="page <= 1" @click="prevPage" icon="i-heroicons-chevron-left" />
+      <UButton :disabled="page <= 1 || pending" @click="prevPage" icon="i-heroicons-chevron-left" />
       <span>Halaman {{ page }}</span>
-      <UButton :disabled="!hasNextPage" @click="nextPage" icon="i-heroicons-chevron-right" />
+      <UButton :disabled="!hasNextPage || pending" @click="nextPage" icon="i-heroicons-chevron-right" />
     </div>
   </NuxtLayout>
 </template>
@@ -32,7 +35,7 @@ const { data: houseData, refresh, pending } = await useAsyncData(
   async () => {
     const { data, error } = await supabase
       .from('house_number')
-      .select('nomor_rumah', { count: 'exact' })
+      .select('name', { count: 'exact' })
       .range(from.value, to.value)
 
     if (error) throw error
@@ -44,14 +47,14 @@ const { data: houseData, refresh, pending } = await useAsyncData(
 
 // Kolom untuk UTable
 type HouseNumber = {
-  nomor_rumah: string
+  name: string
 }
 
 const columns: TableColumn<HouseNumber>[] = [
   {
-    accessorKey: 'nomor_rumah',
+    accessorKey: 'name',
     header: 'Nomor Rumah',
-    cell: ({ row }) => row.getValue('nomor_rumah'),
+    cell: ({ row }) => row.getValue('name'),
   }
 ]
 

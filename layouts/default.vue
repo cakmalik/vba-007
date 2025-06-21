@@ -11,7 +11,7 @@
             {{ pageTitle }}
           </h1>
           <!-- subtitle -->
-          <h2 class="text-sm font-semibold text-gray-500">
+          <h2 class="text-sm text-gray-500">
             {{ subtitle }}
           </h2>
         </div>
