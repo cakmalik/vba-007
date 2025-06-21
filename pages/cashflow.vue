@@ -5,6 +5,10 @@
 </template>
 
 <script setup lang="ts">
+import { h, resolveComponent } from 'vue'
+import type { TableColumn } from '@nuxt/ui'
+
+const UBadge = resolveComponent('UBadge')
 
 definePageMeta({
   middleware: ['auth', 'treasurer'],
@@ -32,6 +36,7 @@ const { data: cashflowData, refresh, pending } = await useAsyncData(
       .from('cash_flows')
       .select('*')
       .range(from.value, to.value)
+      .order('created_at', { ascending: false })
 
     console.log('daata', data)
     if (error) throw error
@@ -66,7 +71,15 @@ const columns: TableColumn<Cashflow>[] = [
   {
     accessorKey: 'type',
     header: 'Type',
-    cell: ({ row }) => row.getValue('type'),
+    // cell: ({ row }) => row.getValue('type') === 'in' ? 'Masuk' : 'Keluar',
+    cell: ({ row }) => {
+      const color = {
+        in: 'success' as const,
+        out: 'error' as const,
+      }[row.getValue('type') as string]
+
+      return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () => row.getValue('type'))
+    }
   },
 
 ]
