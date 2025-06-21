@@ -1,8 +1,11 @@
 <template>
   <NuxtLayout>
     <div class="relative">
-      <UTable :data="residentData" :columns="columns" :loading="pending" loading-color="primary"
-        loading-animation="carousel" />
+      <div class="flex px-4 py-3.5 border-b border-accented">
+        <UInput v-model="globalFilter" class="max-w-sm" placeholder="Filter..." />
+      </div>
+      <UTable v-model:global-filter="globalFilter" :data="residentData" :columns="columns" :loading="pending"
+        loading-color="primary" loading-animation="carousel" />
     </div>
 
     <div class="flex items-center justify-between mt-4">
@@ -27,6 +30,7 @@ const supabase = useSupabaseClient()
 const page = ref(1)
 const pageSize = 10
 const hasNextPage = ref(true)
+const globalFilter = ref('')
 
 const from = computed(() => (page.value - 1) * pageSize)
 const to = computed(() => from.value + pageSize - 1)
@@ -38,6 +42,8 @@ const { data: residentData, refresh, pending } = await useAsyncData(
     const { data, error } = await supabase
       .from('profiles')
       .select('*', { count: 'exact' })
+      .eq('role', 'resident')
+      .ilike('full_name', `%${globalFilter.value}%`)
       .range(from.value, to.value)
 
     console.log('daata', data)
@@ -103,7 +109,7 @@ const nextPage = () => page.value++
 const prevPage = () => page.value--
 
 // Refresh saat ganti page
-watch(page, async () => {
+watch([page, globalFilter], async () => {
   await refresh()
 })
 </script>
