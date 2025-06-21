@@ -13,5 +13,11 @@ export default defineNuxtConfig({
     '@nuxt/test-utils',
     '@nuxt/ui',
     '@nuxtjs/supabase'
-  ]
+  ],
+  css: ['~/assets/css/main.css'],
+  ui: {
+    theme: {
+      transitions: true
+    }
+  }
 })

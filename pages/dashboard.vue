@@ -1,11 +1,11 @@
 <template>
-  <div>
+  <NuxtLayout name="treasurer">
     asdfasf
-  </div>
+  </NuxtLayout>
 </template>
 
 <script setup lang="ts">
 definePageMeta({
-  middleware: ['auth', 'treasurer']
+  middleware: ['auth', 'treasurer'],
 })
 </script>
