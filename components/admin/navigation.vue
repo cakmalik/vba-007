@@ -69,7 +69,7 @@ const items = ref<NavigationMenuItem[][]>([
           label: 'Kas',
           description: 'Kelola Keluar masuk kas',
           icon: 'i-lucide-dollar-sign',
-          to: '/kas',
+          to: '/cashflow',
           active: false
         },
       ],
