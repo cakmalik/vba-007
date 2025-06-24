@@ -4,7 +4,7 @@
     <admin-navigation />
 
     <!-- Main Layout -->
-    <div class="flex-1 flex flex-col items-center px-4 sm:px-6 lg:px-8">
+    <div class="flex-1 flex flex-col items-center px-4 sm:px-6 lg:px-8 py-6">
 
       <!-- Header -->
       <header class="w-full max-w-5xl  py-4 mb-4 text-center">
@@ -13,7 +13,7 @@
       </header>
 
       <!-- Page Content -->
-      <div class="w-full max-w-5xl flex-1">
+      <div class="w-full max-w-5xl flex-1 py-6">
         <slot />
       </div>
     </div>

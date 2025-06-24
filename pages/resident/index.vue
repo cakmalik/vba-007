@@ -13,13 +13,52 @@
       <span>Hal {{ page }}</span>
       <UButton :disabled="!hasNextPage || pending" @click="nextPage" icon="i-heroicons-chevron-right" />
     </div>
+    <UModal v-model:open="modalProfile">
+      <template #content>
+        <div class="p-6 space-y-4">
+          <div class="flex items-center space-x-4">
+            <!-- <img v-if="profile.image_url" :src="profile.image_url" alt="Profile Image" class="w-24 h-24 rounded-full object-cover" /> -->
+            <img :src="getProxyImageUrl(profile.image_url)" alt="Profile Image"
+              class="w-24 h-24 rounded-full object-cover" />
+            <div>
+              <h2 class="text-xl font-semibold">{{ profile.full_name }}</h2>
+              <p class="text-sm text-gray-500">{{ profile.nickname }}</p>
+              <p class="text-sm text-gray-500">{{ profile.occupation }}</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <div><strong>Status Rumah:</strong> {{ profile.house_status }}</div>
+            <div><strong>Status Menikah:</strong> {{ profile.is_married ? 'Menikah' : 'Belum' }}</div>
+            <div><strong>Tinggal di Rumah Ini:</strong> {{ profile.is_living ? 'Ya' : 'Tidak' }}</div>
+            <div><strong>Validasi KTP VBA:</strong> {{ profile.is_ktp_vba ? 'Ya' : 'Tidak' }}</div>
+            <div><strong>Nama Pasangan:</strong> {{ profile.partner_name }}</div>
+            <div><strong>No. HP:</strong> {{ profile.phone_number }}</div>
+          </div>
+
+          <div class="text-right">
+            <UButton label="Tutup" @click="modalProfile = false" color="gray" />
+          </div>
+        </div>
+      </template>
+    </UModal>
   </NuxtLayout>
 </template>
 
 <script setup lang="ts">
+import { h, resolveComponent } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
-
+import type { Row } from '@tanstack/vue-table'
+import { useClipboard } from '@vueuse/core'
 const UAvatar = resolveComponent('UAvatar')
+const UButton = resolveComponent('UButton')
+const UBadge = resolveComponent('UBadge')
+const UDropdownMenu = resolveComponent('UDropdownMenu')
+const modalProfile = ref(false)
+
+const defineShortcuts = () => {
+  o: () => modalProfile.value = !modalProfile.value
+}
 
 definePageMeta({
   title: 'Data Warga',
@@ -111,7 +150,78 @@ const columns: TableColumn<Resident>[] = [
       return houses.map((house: any) => house.name).join(', ')
     }
   },
+  {
+    id: 'actions',
+    cell: ({ row }) => {
+      return h(
+        'div',
+        { class: 'text-right' },
+        h(
+          UDropdownMenu,
+          {
+            content: {
+              align: 'end'
+            },
+            items: getRowItems(row),
+            'aria-label': 'Actions dropdown'
+          },
+          () =>
+            h(UButton, {
+              icon: 'i-lucide-ellipsis-vertical',
+              color: 'neutral',
+              variant: 'ghost',
+              class: 'ml-auto',
+              'aria-label': 'Actions dropdown'
+            })
+        )
+      )
+    }
+  }
 ]
+
+// const toast = useToast()
+// const { copy } = useClipboard()
+function getRowItems(row: Row<Payment>) {
+  return [
+    {
+      label: 'Lihat Profile',
+      onSelect() {
+        showProfile(row.original.id)
+      }
+    },
+  ]
+}
+
+const profile = ref({
+  full_name: '',
+  nickname: '',
+  occupation: '',
+  house_status: '',
+  is_married: false,
+  is_living: false,
+  is_ktp_vba: false,
+  partner_name: '',
+  phone_number: '',
+})
+
+async function showProfile(id: string) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', id)
+    .limit(1)
+    .single()
+
+
+  if (error) {
+    console.log('gagal fetching data pofile', error)
+  }
+
+  profile.value = data
+  console.log('data profile', data)
+
+  modalProfile.value = true
+}
 
 // Pagination
 const nextPage = () => page.value++
