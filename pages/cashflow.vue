@@ -4,34 +4,43 @@
       <!-- Kas Masuk -->
       <div class="flex-1 min-w-[250px] bg-green-100 text-green-800 rounded-xl shadow p-4">
         <h3 class="text-lg font-semibold mb-2">Kas Masuk</h3>
-        <p class="text-2xl font-bold">{{ formatCurrency(kasMasuk) }}</p>
+        <p class="text-2xl font-bold">
+          {{ formatCurrency(kasMasuk) }}
+        </p>
       </div>
 
       <!-- Kas Keluar -->
       <div class="flex-1 min-w-[250px] bg-red-100 text-red-800 rounded-xl shadow p-4">
         <h3 class="text-lg font-semibold mb-2">Kas Keluar</h3>
-        <p class="text-2xl font-bold">{{ formatCurrency(kasKeluar) }}</p>
+        <p class="text-2xl font-bold">
+          {{ formatCurrency(kasKeluar) }}
+        </p>
       </div>
     </div>
 
+    <!-- Tabel Kas -->
     <UTable :data="cashflowData" :columns="columns" :loading="pending" loading-color="primary" />
   </NuxtLayout>
 </template>
 
 <script setup lang="ts">
-import { h, resolveComponent } from 'vue'
+import { h, resolveComponent, watchEffect } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
 
+// Komponen untuk badge
 const UBadge = resolveComponent('UBadge')
 
+// Metadata halaman
 definePageMeta({
   middleware: ['auth', 'treasurer'],
   title: 'Kas',
   subtitle: 'Kelola keluar masuk kas'
 })
 
+// Supabase client
 const supabase = useSupabaseClient()
 
+// Pagination
 const page = ref(1)
 const pageSize = 10
 const hasNextPage = ref(true)
@@ -39,10 +48,11 @@ const hasNextPage = ref(true)
 const from = computed(() => (page.value - 1) * pageSize)
 const to = computed(() => from.value + pageSize - 1)
 
+// Pagination handler
 const nextPage = () => page.value++
 const prevPage = () => page.value--
 
-// Ambil data cashflow
+// Ambil data kas (paginated)
 const { data: cashflowData, refresh, pending } = await useAsyncData(
   () => `cashflow-page-${page.value}`,
   async () => {
@@ -58,23 +68,43 @@ const { data: cashflowData, refresh, pending } = await useAsyncData(
   }
 )
 
-// Ambil data summary total kas masuk dan keluar
 const { data: summary, pending: loadingSummary } = await useAsyncData(
   'cashflow-summary',
   async () => {
     const { data, error } = await supabase
       .from('cash_flows')
-      .select('type, sum(amount)', { count: 'exact' })
-      .group('type')
+      .select('type, amount')
 
     if (error) throw error
-    return data
+
+    // Hitung total kas masuk dan keluar
+    const result = { in: 0, out: 0 }
+    for (const item of data) {
+      if (item.type === 'in') result.in += item.amount
+      else if (item.type === 'out') result.out += item.amount
+    }
+
+    // Kembalikan array summary mirip hasil query agregat
+    return [
+      { type: 'in', total: result.in },
+      { type: 'out', total: result.out }
+    ]
+  },
+  {
+    server: false, // Supabase hanya jalan di client
+    lazy: true     // Eksekusi setelah halaman siap
   }
 )
+// Debug summary jika berubah
+// watchEffect(() => {
+//   console.log('Cashflow summary updated:', summary.value)
+// })
 
-const kasMasuk = computed(() => summary.value?.find(i => i.type === 'in')?.sum ?? 0)
-const kasKeluar = computed(() => summary.value?.find(i => i.type === 'out')?.sum ?? 0)
+// Hitung total kas masuk dan keluar
+const kasMasuk = computed(() => summary.value?.find(i => i.type === 'in')?.total ?? 0)
+const kasKeluar = computed(() => summary.value?.find(i => i.type === 'out')?.total ?? 0)
 
+// Definisi tipe dan kolom tabel
 type Cashflow = {
   date: string
   description: string
@@ -82,7 +112,6 @@ type Cashflow = {
   type: string
 }
 
-// Kolom tabel
 const columns: TableColumn<Cashflow>[] = [
   {
     accessorKey: 'date',
@@ -113,8 +142,8 @@ const columns: TableColumn<Cashflow>[] = [
   }
 ]
 
-// Refresh saat ganti halaman
-watch([page], async () => {
+// Refresh data saat halaman berubah
+watch(page, async () => {
   await refresh()
 })
 </script>
