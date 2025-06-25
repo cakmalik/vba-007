@@ -27,14 +27,48 @@
       <UButton :disabled="!hasNextPage || pending" @click="nextPage" icon="i-heroicons-chevron-right" />
     </div>
 
-    <UButton icon="i-lucide-plus" size="2xl" color="info" variant="solid" class="fixed bottom-6 right-6 rounded-full" />
+    <UButton @click="create" icon="i-lucide-plus" size="2xl" color="info" variant="solid"
+      class="fixed bottom-6 right-6 rounded-full" />
+
+    <UDrawer v-model:open="showForm">
+      <template #title>
+        Tambah Data Kas
+      </template>
+
+      <template #content>
+        <div class="p-6">
+          <UForm :state="form" @submit="submitForm" class="space-y-4">
+            <!-- Tipe -->
+            <USelect v-model="form.tipe"
+              :options="[{ label: 'Masuk', value: 'masuk' }, { label: 'Keluar', value: 'keluar' }]"
+              placeholder="Pilih tipe kas" label="Tipe" />
+
+            <!-- Tanggal -->
+            <UInput v-model="form.tanggal" type="date" label="Tanggal" />
+
+            <!-- Keterangan -->
+            <UInput v-model="form.keterangan" label="Keterangan" placeholder="Tulis keterangan" />
+
+            <!-- Jumlah -->
+            <UInput v-model="form.jumlah" type="number" label="Jumlah" placeholder="0" />
+
+            <!-- Submit -->
+            <div class="pt-4">
+              <UButton type="submit" color="primary" block>
+                Simpan
+              </UButton>
+            </div>
+          </UForm>
+        </div>
+      </template>
+    </UDrawer>
   </NuxtLayout>
 </template>
 
 <script setup lang="ts">
 import { h, resolveComponent, watchEffect } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
-
+import { useDateFormat } from '@vueuse/core'
 // Komponen untuk badge
 const UBadge = resolveComponent('UBadge')
 
@@ -154,4 +188,27 @@ const columns: TableColumn<Cashflow>[] = [
 watch(page, async () => {
   await refresh()
 })
+
+const showForm = ref(false)
+const create = () => {
+  showForm.value = true
+}
+
+const today = useDateFormat(new Date(), 'YYYY-MM-DD')
+
+const form = ref({
+  tipe: '',
+  tanggal: today.value,
+  keterangan: '',
+  jumlah: null
+})
+
+const submitForm = () => {
+  console.log('Data form:', form.value)
+
+  // Tambahkan logika simpan di sini
+  // contoh: kirim ke server atau update state lokal
+
+  showForm.value = false // tutup drawer setelah submit
+}
 </script>
