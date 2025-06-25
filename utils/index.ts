@@ -7,7 +7,9 @@ export const { format: formatNumber } = Intl.NumberFormat('en-GB', {
 
 export const { format: formatCurrency } = Intl.NumberFormat('id-ID', {
   style: 'currency',
-  currency: 'IDR'
+  currency: 'IDR',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0
 })
 
 const formatDate = (date: Date) => {

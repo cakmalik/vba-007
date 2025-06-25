@@ -20,6 +20,14 @@
 
     <!-- Tabel Kas -->
     <UTable :data="cashflowData" :columns="columns" :loading="pending" loading-color="primary" />
+
+    <div class="flex items-center justify-between mt-4">
+      <UButton :disabled="page <= 1 || pending" @click="prevPage" icon="i-heroicons-chevron-left" />
+      <span>Hal {{ page }}</span>
+      <UButton :disabled="!hasNextPage || pending" @click="nextPage" icon="i-heroicons-chevron-right" />
+    </div>
+
+    <UButton icon="i-lucide-plus" size="2xl" color="info" variant="solid" class="fixed bottom-6 right-6 rounded-full" />
   </NuxtLayout>
 </template>
 

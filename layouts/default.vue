@@ -13,7 +13,7 @@
       </header>
 
       <!-- Page Content -->
-      <div class="w-full max-w-5xl flex-1 py-6">
+      <div class="w-full max-w-5xl flex-1 pt-6 pb-16">
         <slot />
       </div>
     </div>
