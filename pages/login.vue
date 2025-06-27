@@ -36,7 +36,7 @@ const email = ref("");
 const countdown = ref(0);
 
 const redirectTo = config.public.emailRedirectTo;
-
+console.log("Redirect to:", useRuntimeConfig().public.emailRedirectTo);
 const signInWithOtp = async () => {
   const { error } = await supabase.auth.signInWithOtp({
     email: email.value,

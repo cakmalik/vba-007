@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
   runtimeConfig: {
     public: {
-      emailRedirectTo: 'http://localhost:3000/confirm', // default (development)
+      emailRedirectTo: 'https://vba-007.vercel.app/confirm', // default (development)
     }
   },
 
