@@ -1,13 +1,15 @@
 <template>
   <div class="min-h-screen bg-dark text-neutral-200 flex flex-col">
-    <!-- Navigation -->
-    <admin-navigation />
-
+    <div class="fixed top-0 right-0 p-4 z-50">
+      <ColorModeButton />
+    </div>
     <!-- Main Layout -->
     <div class="flex-1 flex flex-col items-center px-4 sm:px-6 lg:px-8 py-6">
       <!-- Header -->
       <header class="w-full max-w-5xl py-4 mb-4 text-center">
-        <h1 class="text-xl font-semibold">{{ pageTitle }}</h1>
+        <h1 class="text-xl font-semibold text-primary">
+          {{ pageTitle }}
+        </h1>
         <p v-if="subtitle" class="text-sm text-gray-400 mt-1">{{ subtitle }}</p>
       </header>
 
@@ -37,7 +39,8 @@
               to="/dues/history"
               class="flex flex-col items-center text-gray-600 dark:text-gray-300 hover:text-primary-600"
               :class="{
-                'text-primary-600 font-semibold': $route.path === '/history',
+                'text-primary-600 font-semibold':
+                  $route.path === '/dues/history',
               }"
             >
               <UIcon name="i-lucide-history" class="size-5" />
@@ -46,11 +49,10 @@
           </li>
           <li>
             <NuxtLink
-              to="/notifications"
+              to="/cashflow"
               class="flex flex-col items-center text-gray-600 dark:text-gray-300 hover:text-primary-600"
               :class="{
-                'text-primary-600 font-semibold':
-                  $route.path === '/notifications',
+                'text-primary-600 font-semibold': $route.path === '/cashflow',
               }"
             >
               <UIcon name="i-lucide-arrow-left-right" class="size-5" />
@@ -59,10 +61,10 @@
           </li>
           <li>
             <NuxtLink
-              to="/profile"
+              to="/pay"
               class="flex flex-col items-center text-gray-600 dark:text-gray-300 hover:text-primary-600"
               :class="{
-                'text-primary-600 font-semibold': $route.path === '/profile',
+                'text-primary-600 font-semibold': $route.path === '/pay',
               }"
             >
               <UIcon name="i-lucide-banknote" class="size-5" />

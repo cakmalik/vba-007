@@ -25,7 +25,7 @@ export default defineNuxtConfig({
     redirectOptions: {
       login: '/login',
       callback: '/confirm',
-      exclude: ['/login', '/confirm', '/dues/history', '/coba'],
+      exclude: ['/login', '/confirm', '/dues/history', '/cashflow', '/pay'],
     }
   }
   // image: {
