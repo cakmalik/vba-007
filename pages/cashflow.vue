@@ -1,27 +1,30 @@
 <template>
   <NuxtLayout :name="isTreasurer ? 'default' : 'public'">
-    <div class="flex flex-wrap gap-4 mb-6">
+    <div class="flex gap-2 sm:gap-4 mb-4">
       <!-- Kas Masuk -->
       <div
-        class="flex-1 min-w-[250px] bg-green-100 text-green-800 rounded-xl shadow p-4"
+        class="flex-1 min-w-[150px] bg-green-100 text-green-800 rounded-lg shadow p-3 sm:p-4"
       >
-        <h3 class="text-lg font-semibold mb-2">Kas Masuk</h3>
-        <p class="text-2xl font-bold">
+        <h3 class="text-sm sm:text-base font-semibold mb-1 sm:mb-2">
+          Kas Masuk
+        </h3>
+        <p class="text-lg sm:text-2xl font-bold">
           {{ formatCurrency(kasMasuk) }}
         </p>
       </div>
 
       <!-- Kas Keluar -->
       <div
-        class="flex-1 min-w-[250px] bg-red-100 text-red-800 rounded-xl shadow p-4"
+        class="flex-1 min-w-[150px] bg-red-100 text-red-800 rounded-lg shadow p-3 sm:p-4"
       >
-        <h3 class="text-lg font-semibold mb-2">Kas Keluar</h3>
-        <p class="text-2xl font-bold">
+        <h3 class="text-sm sm:text-base font-semibold mb-1 sm:mb-2">
+          Kas Keluar
+        </h3>
+        <p class="text-lg sm:text-2xl font-bold">
           {{ formatCurrency(kasKeluar) }}
         </p>
       </div>
     </div>
-
     <!-- Tabel Kas -->
     <UTable
       :data="cashflowData"
@@ -45,6 +48,7 @@
     </div>
 
     <UButton
+      v-if="isTreasurer"
       @click="create"
       icon="i-lucide-plus"
       size="2xl"
@@ -348,6 +352,7 @@ const submitForm = async () => {
   showForm.value = false;
 };
 
+const roleName = ref<string | null>(null);
 const isTreasurer = computed(() => roleName.value === "treasurer");
 onMounted(async () => {
   roleName.value = await getRoleName();
