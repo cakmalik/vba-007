@@ -431,12 +431,12 @@ function mapFormToPayload(form: any) {
 }
 
 async function submitForm() {
-  // const { id, ...payload } = form.value;
   const { id } = form.value;
   const payload = mapFormToPayload(form.value);
   console.log("payload", payload);
 
   let res;
+
   if (!isEdit.value) {
     res = await supabase.from("profile_dues").insert(payload).select().single();
   } else {
@@ -453,9 +453,61 @@ async function submitForm() {
     return;
   }
 
+  const dues = res.data;
+
+  // ✅ Tambah ke cash_flows hanya saat insert baru
+  if (!isEdit.value && dues?.id) {
+    const cashFlowPayload = {
+      date: payload.due_date,
+      type: "in",
+      amount: payload.amount_override,
+      description: `Pembayaran iuran oleh ${form.value.profile_id?.label ?? form.value.profile_id}`,
+      source: "iuran",
+      category_id: null, // kalau belum ada kategori bisa diisi null
+      recorded_by: payload.profile_id,
+      reference_id: dues.id,
+    };
+
+    const cashRes = await supabase
+      .from("cash_flows")
+      .insert(cashFlowPayload)
+      .select()
+      .single();
+
+    if (cashRes.error) {
+      console.error("Gagal simpan ke cash_flows:", cashRes.error);
+    }
+  }
+
   await refresh();
   showForm.value = false;
 }
+// async function submitForm() {
+//   // const { id, ...payload } = form.value;
+//   const { id } = form.value;
+//   const payload = mapFormToPayload(form.value);
+//   console.log("payload", payload);
+//
+//   let res;
+//   if (!isEdit.value) {
+//     res = await supabase.from("profile_dues").insert(payload).select().single();
+//   } else {
+//     res = await supabase
+//       .from("profile_dues")
+//       .update(payload)
+//       .eq("id", id!)
+//       .select()
+//       .single();
+//   }
+//
+//   if (res.error) {
+//     console.error(res.error);
+//     return;
+//   }
+//
+//   await refresh();
+//   showForm.value = false;
+// }
 
 // Dropdown
 const profileOptions = ref([]);
@@ -482,9 +534,16 @@ onMounted(async () => {
 
   profileOptions.value = profiles.map((p) => {
     const house = houses.find((h) => h.profile_id === p.id);
-    const label = house ? `${house.name} - ${p.nickname}` : p.nickname;
+    const nickname = p.nickname.toLowerCase();
+    const label = house ? `${nickname} - ${house.name}` : nickname;
     return { label, value: p.id };
   });
+
+  // profileOptions.value = profiles.map((p) => {
+  //   const house = houses.find((h) => h.profile_id === p.id);
+  //   const label = house ? `${house.name} - ${p.nickname}` : p.nickname;
+  //   return { label, value: p.id };
+  // });
 
   paymentOptions.value =
     paymentsRes.data?.map((p) => ({ label: p.name, value: p.id })) || [];
