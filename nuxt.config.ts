@@ -2,7 +2,15 @@
 export default defineNuxtConfig({
   runtimeConfig: {
     public: {
-      emailRedirectTo: process.env.PUBLIC_REDIRECT_TO || 'http://localhost:3000',
+      emailRedirectTo: 'http://localhost:3000/confirm', // default (development)
+    }
+  },
+
+  $production: {
+    runtimeConfig: {
+      public: {
+        emailRedirectTo: 'https://your-app-name.vercel.app/confirm'
+      }
     }
   },
   compatibilityDate: '2025-05-15',
