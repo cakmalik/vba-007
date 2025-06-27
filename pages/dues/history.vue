@@ -140,9 +140,7 @@
 </template>
 
 <script setup lang="ts">
-const user = useSupabaseUser();
 definePageMeta({
-  middleware: ["auth", "treasurer"],
   title: "Iuran",
   subtitle: "Kelola iuran",
 });
@@ -150,6 +148,7 @@ import { h, onMounted, ref, computed, watch } from "vue";
 import { useDateFormat } from "@vueuse/core";
 import type { TableColumn } from "@nuxt/ui";
 import { UButton } from "#components";
+import { getRoleName } from "@/composables/useRole";
 
 const UAvatar = resolveComponent("UAvatar");
 
@@ -433,8 +432,10 @@ const paymentOptions = ref([]);
 const periodOptions = ref([]);
 const houseOptions = ref([]);
 
+const roleName = ref<string | null>(null);
+
 onMounted(async () => {
-  await getRoleName();
+  roleName.value = await getRoleName();
   fetchTotalAmount();
   const [profilesRes, paymentsRes, periodsRes, housesRes] = await Promise.all([
     supabase.from("profiles").select("id, nickname").eq("role", "resident"),
@@ -468,22 +469,4 @@ watch(
     console.log("Periode dipilih:", newVal.value);
   },
 );
-
-const roleName = ref("resident"); // default sementara
-const isTreasurer = computed(() => roleName.value === "treasurer");
-
-const getRoleName = async () => {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("user_id", user.value.id)
-    .single();
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  roleName.value = data?.role || "resident";
-};
 </script>
