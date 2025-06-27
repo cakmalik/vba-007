@@ -201,7 +201,7 @@ const selectedPeriod = ref(null);
 const selectedBlock = ref(null);
 const totalAmount = ref(0);
 
-watch([page, searchName, selectedPeriod], () => {
+watch([page, searchName, selectedPeriod, selectedBlock], () => {
   refresh();
   fetchTotalAmount();
 });
@@ -254,7 +254,7 @@ const {
         `
         *,
         profiles!profile_dues_profile_id_fkey(nickname, full_name, image_url ),
-        house_number:house_number_id(name),
+        house_number:house_number_id!inner(name, housing_block_id),
         payment_methods!profile_dues_payment_method_id_fkey(name),
         billing_periods!fk_period(month, year)
         `,
@@ -274,6 +274,11 @@ const {
     if (selectedPeriod.value) {
       const periodId = selectedPeriod.value.value ?? selectedPeriod.value;
       query = query.eq("billing_period_id", periodId);
+    }
+
+    if (selectedBlock.value) {
+      const blockId = selectedBlock.value.value ?? selectedBlock.value;
+      query = query.eq("house_number.housing_block_id", blockId);
     }
 
     const { data, error } = await query;
@@ -613,4 +618,11 @@ const getHouseNumbers = async () => {
     form.value.house_number_id = houseOptions.value[0];
   }
 };
+
+// watch(
+//   () => form.value.selectedBlock,
+//   async (newVal) => {
+//     await get();
+//   },
+// );
 </script>

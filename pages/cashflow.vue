@@ -1,110 +1,112 @@
 <template>
-  <NuxtLayout :name="isTreasurer ? 'default' : 'public'">
-    <div class="flex gap-2 sm:gap-4 mb-4">
-      <!-- Kas Masuk -->
-      <div
-        class="flex-1 min-w-[150px] bg-green-100 text-green-800 rounded-lg shadow p-3 sm:p-4"
-      >
-        <h3 class="text-sm sm:text-base font-semibold mb-1 sm:mb-2">
-          Kas Masuk
-        </h3>
-        <p class="text-lg sm:text-2xl font-bold">
-          {{ formatCurrency(kasMasuk) }}
-        </p>
-      </div>
-
-      <!-- Kas Keluar -->
-      <div
-        class="flex-1 min-w-[150px] bg-red-100 text-red-800 rounded-lg shadow p-3 sm:p-4"
-      >
-        <h3 class="text-sm sm:text-base font-semibold mb-1 sm:mb-2">
-          Kas Keluar
-        </h3>
-        <p class="text-lg sm:text-2xl font-bold">
-          {{ formatCurrency(kasKeluar) }}
-        </p>
-      </div>
-    </div>
-    <!-- Tabel Kas -->
-    <UTable
-      :data="cashflowData"
-      :columns="columns"
-      :loading="pending"
-      loading-color="primary"
-    />
-
-    <div class="flex items-center justify-between mt-4">
-      <UButton
-        :disabled="page <= 1 || pending"
-        @click="prevPage"
-        icon="i-heroicons-chevron-left"
-      />
-      <span>Hal {{ page }}</span>
-      <UButton
-        :disabled="!hasNextPage || pending"
-        @click="nextPage"
-        icon="i-heroicons-chevron-right"
-      />
-    </div>
-
-    <UButton
-      v-if="isTreasurer"
-      @click="create"
-      icon="i-lucide-plus"
-      size="2xl"
-      color="info"
-      variant="solid"
-      class="fixed bottom-6 right-6 rounded-full px-3 py-3"
-    />
-
-    <UDrawer v-model:open="showForm">
-      <template #title> Tambah Data Kas </template>
-
-      <template #content>
-        <div class="p-6 flex justify-center">
-          <UForm
-            :state="form"
-            @submit="submitForm"
-            class="flex flex-wrap gap-4 items-end"
-          >
-            <!-- Tipe -->
-            <USelect
-              v-model="form.type"
-              :items="[
-                { label: 'Masuk', value: 'in' },
-                { label: 'Keluar', value: 'out' },
-              ]"
-              placeholder="Pilih tipe kas"
-              label="Tipe"
-            />
-
-            <!-- Tanggal -->
-            <UInput v-model="form.date" type="date" label="Tanggal" />
-
-            <!-- Keterangan -->
-            <UInput
-              v-model="form.description"
-              label="Keterangan"
-              placeholder="Tulis keterangan"
-            />
-
-            <!-- Jumlah -->
-            <UInput
-              v-model="form.amount"
-              type="number"
-              label="Jumlah"
-              placeholder="0"
-            />
-
-            <!-- Submit -->
-            <div class="pt-4">
-              <UButton type="submit" color="primary" block> Simpan </UButton>
-            </div>
-          </UForm>
+  <div class="">
+    <NuxtLayout :name="isTreasurer ? 'default' : 'public'">
+      <div class="flex gap-2 sm:gap-4 mb-4">
+        <!-- Kas Masuk -->
+        <div
+          class="flex-1 min-w-[150px] bg-green-100 text-green-800 rounded-lg shadow p-3 sm:p-4"
+        >
+          <h3 class="text-sm sm:text-base font-semibold mb-1 sm:mb-2">
+            Kas Masuk
+          </h3>
+          <p class="text-lg sm:text-2xl font-bold">
+            {{ formatCurrency(kasMasuk) }}
+          </p>
         </div>
-      </template>
-    </UDrawer>
-  </NuxtLayout>
+
+        <!-- Kas Keluar -->
+        <div
+          class="flex-1 min-w-[150px] bg-red-100 text-red-800 rounded-lg shadow p-3 sm:p-4"
+        >
+          <h3 class="text-sm sm:text-base font-semibold mb-1 sm:mb-2">
+            Kas Keluar
+          </h3>
+          <p class="text-lg sm:text-2xl font-bold">
+            {{ formatCurrency(kasKeluar) }}
+          </p>
+        </div>
+      </div>
+      <!-- Tabel Kas -->
+      <UTable
+        :data="cashflowData"
+        :columns="columns"
+        :loading="pending"
+        loading-color="primary"
+      />
+
+      <div class="flex items-center justify-between mt-4">
+        <UButton
+          :disabled="page <= 1 || pending"
+          @click="prevPage"
+          icon="i-heroicons-chevron-left"
+        />
+        <span>Hal {{ page }}</span>
+        <UButton
+          :disabled="!hasNextPage || pending"
+          @click="nextPage"
+          icon="i-heroicons-chevron-right"
+        />
+      </div>
+
+      <UButton
+        v-if="isTreasurer"
+        @click="create"
+        icon="i-lucide-plus"
+        size="2xl"
+        color="info"
+        variant="solid"
+        class="fixed bottom-6 right-6 rounded-full px-3 py-3"
+      />
+
+      <UDrawer v-model:open="showForm">
+        <template #title> Tambah Data Kas </template>
+
+        <template #content>
+          <div class="p-6 flex justify-center">
+            <UForm
+              :state="form"
+              @submit="submitForm"
+              class="flex flex-wrap gap-4 items-end"
+            >
+              <!-- Tipe -->
+              <USelect
+                v-model="form.type"
+                :items="[
+                  { label: 'Masuk', value: 'in' },
+                  { label: 'Keluar', value: 'out' },
+                ]"
+                placeholder="Pilih tipe kas"
+                label="Tipe"
+              />
+
+              <!-- Tanggal -->
+              <UInput v-model="form.date" type="date" label="Tanggal" />
+
+              <!-- Keterangan -->
+              <UInput
+                v-model="form.description"
+                label="Keterangan"
+                placeholder="Tulis keterangan"
+              />
+
+              <!-- Jumlah -->
+              <UInput
+                v-model="form.amount"
+                type="number"
+                label="Jumlah"
+                placeholder="0"
+              />
+
+              <!-- Submit -->
+              <div class="pt-4">
+                <UButton type="submit" color="primary" block> Simpan </UButton>
+              </div>
+            </UForm>
+          </div>
+        </template>
+      </UDrawer>
+    </NuxtLayout>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -359,6 +361,7 @@ const submitForm = async () => {
 const roleName = ref<string | null>(null);
 const isTreasurer = computed(() => roleName.value === "treasurer");
 onMounted(async () => {
+  await nextTick();
   roleName.value = await getRoleName();
 });
 </script>
