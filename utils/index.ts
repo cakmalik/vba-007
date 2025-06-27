@@ -28,4 +28,18 @@ const numberToIDR = (value: number | string) => {
   }).format(number)
 }
 
-export { formatDate, numberToIDR } // ✅ Sudah benar
+
+const namaBulanDariAngka = (angka: number): string => {
+  const date = new Date(2000, angka - 1); // tahun bebas
+  return new Intl.DateTimeFormat('id-ID', { month: 'long' }).format(date);
+}
+
+
+const getProxyImageUrl = (url?: string) => {
+  if (!url) return ''
+  const match = url.match(/(?:id=|\/d\/)([a-zA-Z0-9_-]+)/)
+  const fileId = match?.[1]
+  return fileId ? `/api/image/${fileId}` : ''
+}
+
+export { formatDate, numberToIDR, namaBulanDariAngka, getProxyImageUrl }
