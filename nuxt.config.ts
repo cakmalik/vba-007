@@ -9,7 +9,7 @@ export default defineNuxtConfig({
   $production: {
     runtimeConfig: {
       public: {
-        emailRedirectTo: 'https://your-app-name.vercel.app/confirm'
+        emailRedirectTo: 'https://vba-007.vercel.app/confirm'
       }
     }
   },
