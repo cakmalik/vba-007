@@ -2,8 +2,8 @@
 export default defineNuxtConfig({
   runtimeConfig: {
     apiSecret: '123',
-    supabaseUrl: '',
-    supabaseKey: '',
+    // supabaseUrl: '',
+    // supabaseKey: '',
 
     public: {
       apiBase: '/api',
