@@ -1,7 +1,29 @@
 <template>
-  <NuxtLayout>
-    <div class="text-lg font-semibold mb-2">
-      Total Semua Iuran: {{ formatCurrency(totalAmount) }}
+  <div class="flex flex-col gap-6" v-if="!isReady">
+    <div class="flex items-center gap-4 mt-12 p-6 pb-0">
+      <USkeleton class="h-12 w-12 rounded-full" />
+      <div class="grid gap-2">
+        <USkeleton class="h-4 w-[250px]" />
+        <USkeleton class="h-4 w-[200px]" />
+      </div>
+    </div>
+
+    <div class="p-6 flex flex-col gap-4">
+      <USkeleton class="h-6 w-full" />
+      <USkeleton class="h-6 w-full" />
+      <USkeleton class="h-20 w-full" />
+    </div>
+  </div>
+
+  <NuxtLayout :name="isTreasurer ? 'default' : 'public'" v-if="isReady">
+    <div
+      v-if="isTreasurer"
+      class="mb-4 bg-primary-100 dark:bg-primary-600 text-primary-700 dark:text-primary-200 px-6 py-4 rounded-lg shadow-sm flex items-center justify-between"
+    >
+      <span class="text-base font-medium">Total </span>
+      <span class="text-2xl font-bold tracking-wide">{{
+        formatCurrency(totalAmount)
+      }}</span>
     </div>
     <!-- Filter Row -->
     <div class="flex justify-between flex-wrap items-center mb-4 gap-2">
@@ -31,7 +53,10 @@
       loading-color="primary"
     />
 
-    <div class="flex justify-between mt-4 items-center">
+    <div
+      class="flex justify-between mt-4 items-center"
+      v-if="hasNextPage || page > 1"
+    >
       <UButton
         :disabled="page <= 1 || pending"
         @click="prevPage"
@@ -142,8 +167,10 @@
 <script setup lang="ts">
 definePageMeta({
   title: "Iuran",
-  subtitle: "Kelola iuran",
+  subtitle: "Data Iuran Bulanan Warga",
+  layout: "default",
 });
+
 import { h, onMounted, ref, computed, watch } from "vue";
 import { useDateFormat } from "@vueuse/core";
 import type { TableColumn } from "@nuxt/ui";
@@ -434,6 +461,8 @@ const houseOptions = ref([]);
 
 const roleName = ref<string | null>(null);
 
+const isTreasurer = computed(() => roleName.value === "treasurer");
+const isReady = ref(false);
 onMounted(async () => {
   roleName.value = await getRoleName();
   fetchTotalAmount();
@@ -461,6 +490,23 @@ onMounted(async () => {
       label: `${namaBulanDariAngka(p.month)} ${p.year}`,
       value: p.id,
     })) || [];
+
+  const now = new Date();
+  const selectedMonth = now.getMonth() + 1;
+  const selectedYear = now.getFullYear();
+
+  const selectedPeriodObj = periodsRes.data?.find(
+    (p) => p.month === selectedMonth && p.year === selectedYear,
+  );
+
+  if (selectedPeriodObj) {
+    selectedPeriod.value = {
+      label: `${namaBulanDariAngka(selectedPeriodObj.month)} ${selectedPeriodObj.year}`,
+      value: selectedPeriodObj.id,
+    };
+  }
+
+  isReady.value = true;
 });
 
 watch(

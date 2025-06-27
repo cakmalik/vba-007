@@ -20,6 +20,14 @@ export default defineNuxtConfig({
       transitions: true
     }
   },
+  supabase: {
+    redirect: true,
+    redirectOptions: {
+      login: '/login',
+      callback: '/confirm',
+      exclude: ['/login', '/confirm', '/dues/history', '/coba'],
+    }
+  }
   // image: {
   //   provider: 'none' // atau disable sepenuhnya
   // }
