@@ -243,7 +243,7 @@ const {
       .select(
         `
         *,
-        profiles!profile_dues_profile_id_fkey(nickname, full_name),
+        profiles!profile_dues_profile_id_fkey(nickname, full_name, image_url ),
         house_number:house_number_id(name),
         payment_methods!profile_dues_payment_method_id_fkey(name),
         billing_periods!fk_period(month, year)
@@ -293,7 +293,7 @@ const columns: TableColumn[] = [
     header: "Nama Warga",
     cell: ({ row }) => {
       const avatarSrc =
-        getProxyImageUrl(row.original.image_url) ||
+        getProxyImageUrl(row.original.profiles.image_url) ||
         `https://ui-avatars.com/api/?name=${encodeURIComponent(row.original.full_name)}`;
 
       return h("div", { class: "flex items-center gap-3" }, [
@@ -381,21 +381,25 @@ const form = ref({
 const isEdit = computed(() => !!form.value.id);
 
 function resetForm() {
+  const defaultPayment = paymentOptions.value[1] ?? null;
+
   form.value = {
     id: undefined,
     profile_id: "",
     house_number_id: null,
-    billing_period_id: null,
-    payment_method_id: null,
-    amount_override: 0,
-    due_date: "",
-    status: "unpaid",
+    billing_period_id: selectedPeriod.value ?? null,
+    payment_method_id: defaultPayment,
+    amount_override: 50000,
+    due_date: new Date().toISOString().split("T")[0], // hari ini
+    status: { label: "Paid", value: "paid" },
   };
 }
+
 function create() {
   resetForm();
   showForm.value = true;
 }
+
 function editData(id: number) {
   const item = duesData.value?.find((i) => i.id === id);
   if (!item) return;
@@ -470,7 +474,7 @@ onMounted(async () => {
     supabase.from("profiles").select("id, nickname").eq("role", "resident"),
     supabase.from("payment_methods").select("id, name"),
     supabase.from("billing_periods").select("id, month, year"),
-    supabase.from("house_number").select("profile_id, name"),
+    supabase.from("house_number").select("id, profile_id, name"),
   ]);
 
   const profiles = profilesRes.data || [];
@@ -510,9 +514,28 @@ onMounted(async () => {
 });
 
 watch(
-  () => selectedPeriod.value,
-  (newVal) => {
-    console.log("Periode dipilih:", newVal.value);
+  () => form.value.profile_id,
+  async (newVal) => {
+    await getHouseNumbers();
   },
 );
+
+const getHouseNumbers = async () => {
+  const { data, error } = await supabase
+    .from("house_number")
+    .select("id, profile_id, name")
+    .eq("profile_id", form.value.profile_id?.value);
+  if (error) {
+    console.error("Error fetching house numbers:", error);
+    return;
+  }
+
+  console.log("data nomer rumah", data);
+  houseOptions.value = data.map((h) => ({ label: h.name, value: h.id }));
+
+  //if exists set default house number
+  if (houseOptions.value.length > 0) {
+    form.value.house_number_id = houseOptions.value[0];
+  }
+};
 </script>
