@@ -1,5 +1,10 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  runtimeConfig: {
+    public: {
+      emailRedirectTo: process.env.PUBLIC_REDIRECT_TO || 'http://localhost:3000',
+    }
+  },
   compatibilityDate: '2025-05-15',
   devtools: { enabled: true },
 
