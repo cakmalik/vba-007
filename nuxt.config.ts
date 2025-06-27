@@ -1,16 +1,13 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   runtimeConfig: {
-    public: {
-      emailRedirectTo: 'https://vba-007.vercel.app/confirm', // default (development)
-    }
-  },
+    apiSecret: '123',
+    supabaseUrl: '',
+    supabaseKey: '',
 
-  $production: {
-    runtimeConfig: {
-      public: {
-        emailRedirectTo: 'https://vba-007.vercel.app/confirm'
-      }
+    public: {
+      apiBase: '/api',
+      emailRedirect: 'http://localhost:3000/confirm'
     }
   },
   compatibilityDate: '2025-05-15',
