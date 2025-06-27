@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="isTreasurer"
-    class="flex justify-between items-center px-4 py-2 bg-black border-b border-default sticky top-0 z-50"
+    class="flex justify-between items-center px-4 py-2 dark:bg-black bg-white border-b border-default sticky top-0 z-50"
   >
     <!-- Navigation Menu -->
     <UNavigationMenu
@@ -12,6 +12,7 @@
       color="primary"
       class="data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-48"
     />
+    <!-- <ColorModeButton /> -->
     <UDropdownMenu
       :items="ddItems"
       :content="{

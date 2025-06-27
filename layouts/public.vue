@@ -24,10 +24,11 @@
         <ul class="flex justify-around items-center h-16">
           <li>
             <NuxtLink
-              to="/"
+              to="/dashboard-public"
               class="flex flex-col items-center text-gray-600 dark:text-gray-300 hover:text-primary-600"
               :class="{
-                'text-primary-600 font-semibold': $route.path === '/',
+                'text-primary-600 dark:text-primary-600 font-semibold':
+                  $route.path === '/dashboard-public',
               }"
             >
               <UIcon name="i-lucide-house" class="size-5" />
@@ -39,7 +40,7 @@
               to="/dues/history"
               class="flex flex-col items-center text-gray-600 dark:text-gray-300 hover:text-primary-600"
               :class="{
-                'text-primary-600 font-semibold':
+                'text-primary-600 dark:text-primary-600 font-semibold':
                   $route.path === '/dues/history',
               }"
             >
@@ -52,7 +53,8 @@
               to="/cashflow"
               class="flex flex-col items-center text-gray-600 dark:text-gray-300 hover:text-primary-600"
               :class="{
-                'text-primary-600 font-semibold': $route.path === '/cashflow',
+                'text-primary-600 dark:text-primary-600 font-semibold':
+                  $route.path === '/cashflow',
               }"
             >
               <UIcon name="i-lucide-arrow-left-right" class="size-5" />
@@ -64,7 +66,8 @@
               to="/pay"
               class="flex flex-col items-center text-gray-600 dark:text-gray-300 hover:text-primary-600"
               :class="{
-                'text-primary-600 font-semibold': $route.path === '/pay',
+                'text-primary-600 dark:text-primary-600 font-semibold':
+                  $route.path === '/pay',
               }"
             >
               <UIcon name="i-lucide-banknote" class="size-5" />

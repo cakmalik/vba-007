@@ -241,6 +241,10 @@ const columns: TableColumn<Cashflow>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
+      const isTreasurer = getRoleName() === "Treasurer";
+
+      if (!isTreasurer) return null;
+
       return h(
         "div",
         { class: "text-right" },

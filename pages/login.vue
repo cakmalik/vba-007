@@ -18,7 +18,10 @@
       </div>
 
       <div class="text-center">
-        <NuxtLink to="/dashboard" class="text-xs text-gray-500 hover:underline">
+        <NuxtLink
+          to="/dashboard-public"
+          class="text-xs text-gray-500 hover:underline"
+        >
           Lewati
         </NuxtLink>
       </div>
