@@ -30,15 +30,18 @@
 </template>
 
 <script setup lang="ts">
+const config = useRuntimeConfig();
 const supabase = useSupabaseClient();
 const email = ref("");
 const countdown = ref(0);
+
+const redirectTo = config.public.emailRedirectTo;
 
 const signInWithOtp = async () => {
   const { error } = await supabase.auth.signInWithOtp({
     email: email.value,
     options: {
-      emailRedirectTo: "http://localhost:3000/confirm",
+      emailRedirectTo: redirectTo,
     },
   });
 
@@ -80,7 +83,7 @@ const signInWithGoogle = async () => {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: "http://localhost:3000/confirm",
+      redirectTo: redirectTo,
     },
   });
 
