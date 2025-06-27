@@ -28,7 +28,7 @@
     </div>
 
     <UButton @click="create" icon="i-lucide-plus" size="2xl" color="info" variant="solid"
-      class="fixed bottom-6 right-6 rounded-full" />
+      class="fixed bottom-6 right-6 rounded-full px-3 py-3" />
 
     <UDrawer v-model:open="showForm">
       <template #title>
@@ -36,21 +36,20 @@
       </template>
 
       <template #content>
-        <div class="p-6">
-          <UForm :state="form" @submit="submitForm" class="space-y-4">
+        <div class="p-6 flex justify-center">
+          <UForm :state="form" @submit="submitForm" class="flex flex-wrap gap-4 items-end">
             <!-- Tipe -->
-            <USelect v-model="form.tipe"
-              :options="[{ label: 'Masuk', value: 'masuk' }, { label: 'Keluar', value: 'keluar' }]"
+            <USelect v-model="form.type" :items="[{ label: 'Masuk', value: 'in' }, { label: 'Keluar', value: 'out' }]"
               placeholder="Pilih tipe kas" label="Tipe" />
 
             <!-- Tanggal -->
-            <UInput v-model="form.tanggal" type="date" label="Tanggal" />
+            <UInput v-model="form.date" type="date" label="Tanggal" />
 
             <!-- Keterangan -->
-            <UInput v-model="form.keterangan" label="Keterangan" placeholder="Tulis keterangan" />
+            <UInput v-model="form.description" label="Keterangan" placeholder="Tulis keterangan" />
 
             <!-- Jumlah -->
-            <UInput v-model="form.jumlah" type="number" label="Jumlah" placeholder="0" />
+            <UInput v-model="form.amount" type="number" label="Jumlah" placeholder="0" />
 
             <!-- Submit -->
             <div class="pt-4">
@@ -69,8 +68,11 @@
 import { h, resolveComponent, watchEffect } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
 import { useDateFormat } from '@vueuse/core'
-// Komponen untuk badge
+
+const UAvatar = resolveComponent('UAvatar')
+const UButton = resolveComponent('UButton')
 const UBadge = resolveComponent('UBadge')
+const UDropdownMenu = resolveComponent('UDropdownMenu')
 
 // Metadata halaman
 definePageMeta({
@@ -181,8 +183,63 @@ const columns: TableColumn<Cashflow>[] = [
 
       return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () => row.getValue('type'))
     }
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => {
+      return h(
+        'div',
+        { class: 'text-right' },
+        h(
+          UDropdownMenu,
+          {
+            content: {
+              align: 'end'
+            },
+            items: getRowItems(row),
+            'aria-label': 'Actions dropdown'
+          },
+          () =>
+            h(UButton, {
+              icon: 'i-lucide-ellipsis-vertical',
+              color: 'neutral',
+              variant: 'ghost',
+              class: 'ml-auto',
+              'aria-label': 'Actions dropdown'
+            })
+        )
+      )
+    }
   }
 ]
+
+function getRowItems(row: Row<Payment>) {
+  return [
+    {
+      label: 'Edit',
+      onSelect() {
+        editData(row.original.id)
+      }
+    },
+  ]
+}
+
+const isEdit = computed(() => !!form.value.id)
+
+const editData = (id: string) => {
+  const item = cashflowData.value?.find(i => i.id === id)
+  if (!item) return
+
+  form.value = {
+    id: item.id,
+    type: item.type,
+    date: item.date,
+    description: item.description,
+    amount: item.amount
+  }
+
+  showForm.value = true
+}
 
 // Refresh data saat halaman berubah
 watch(page, async () => {
@@ -191,24 +248,55 @@ watch(page, async () => {
 
 const showForm = ref(false)
 const create = () => {
+  resetForm()
   showForm.value = true
+}
+
+const resetForm = () => {
+  form.value = {
+    id: null,
+    type: 'in',
+    date: today.value,
+    description: '',
+    amount: null
+  }
 }
 
 const today = useDateFormat(new Date(), 'YYYY-MM-DD')
 
 const form = ref({
-  tipe: '',
-  tanggal: today.value,
-  keterangan: '',
-  jumlah: null
+  id: null,
+  type: 'in',
+  date: today.value,
+  description: '',
+  amount: null
 })
 
-const submitForm = () => {
-  console.log('Data form:', form.value)
+const submitForm = async () => {
+  let error
 
-  // Tambahkan logika simpan di sini
-  // contoh: kirim ke server atau update state lokal
+  if (!isEdit.value) {
+    ({ error } = await supabase
+      .from('cash_flows')
+      .insert(form.value))
+  } else {
+    ({ error } = await supabase
+      .from('cash_flows')
+      .update({
+        type: form.value.type,
+        date: form.value.date,
+        description: form.value.description,
+        amount: form.value.amount
+      })
+      .eq('id', form.value.id))
+  }
 
-  showForm.value = false // tutup drawer setelah submit
+  if (error) {
+    console.error(error)
+    return
+  }
+
+  await refresh()
+  showForm.value = false
 }
 </script>

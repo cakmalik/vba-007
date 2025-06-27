@@ -2,9 +2,26 @@
 import { ref, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import type { NavigationMenuItem } from '@nuxt/ui'
-
+import type { DropdownMenuItem } from '@nuxt/ui'
 const route = useRoute()
 
+const ddItems = ref<DropdownMenuItem[]>([
+  {
+    label: 'Profile',
+    icon: 'i-lucide-user',
+    onSelect: handleLogout
+  },
+])
+
+function handleLogout() {
+  console.log('Logout')
+  // Logika logout (sesuaikan dengan autentikasi kamu)
+  // Misalnya pakai navigateTo + clear token
+  alert('Logging out...')
+  // Contoh:
+  // useAuth().logout()
+  // navigateTo('/login')
+}
 const items = ref<NavigationMenuItem[][]>([
   [
     {
@@ -122,6 +139,18 @@ watchEffect(() => {
 </script>
 
 <template>
-  <UNavigationMenu highlight highlight-color="primary" orientation="horizontal" :items="items" color="primary"
-    class="z-50 data-[orientation=horizontal]:border-b border-default data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-48 sticky top-0 bg-black" />
+  <div class="flex justify-between items-center px-4 py-2 bg-black border-b border-default sticky top-0 z-50">
+    <!-- Navigation Menu -->
+    <UNavigationMenu highlight highlight-color="primary" orientation="horizontal" :items="items" color="primary"
+      class="data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-48" />
+    <UDropdownMenu :items="ddItems" :content="{
+      align: 'start',
+      side: 'bottom',
+      sideOffset: 8
+    }" :ui="{
+      content: 'w-48'
+    }">
+      <UButton icon="i-lucide-user" color="neutral" variant="outline" class="" />
+    </UDropdownMenu>
+  </div>
 </template>
