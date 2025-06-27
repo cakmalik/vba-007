@@ -44,6 +44,15 @@
         placeholder="Filter Periode"
         class="w-full sm:w-1/3 md:w-1/4"
       />
+      <!-- Filter Periode -->
+      <USelectMenu
+        v-model="selectedBlock"
+        :items="blockOptions"
+        option-attribute="label"
+        value-attribute="value"
+        placeholder="Filter Blok"
+        class="w-full sm:w-1/3 md:w-1/4"
+      />
     </div>
 
     <UTable
@@ -189,6 +198,7 @@ const from = computed(() => (page.value - 1) * pageSize);
 const to = computed(() => from.value + pageSize - 1);
 const searchName = ref("");
 const selectedPeriod = ref(null);
+const selectedBlock = ref(null);
 const totalAmount = ref(0);
 
 watch([page, searchName, selectedPeriod], () => {
@@ -514,6 +524,7 @@ const profileOptions = ref([]);
 const paymentOptions = ref([]);
 const periodOptions = ref([]);
 const houseOptions = ref([]);
+const blockOptions = ref([]);
 
 const roleName = ref<string | null>(null);
 
@@ -522,12 +533,14 @@ const isReady = ref(false);
 onMounted(async () => {
   roleName.value = await getRoleName();
   fetchTotalAmount();
-  const [profilesRes, paymentsRes, periodsRes, housesRes] = await Promise.all([
-    supabase.from("profiles").select("id, nickname").eq("role", "resident"),
-    supabase.from("payment_methods").select("id, name"),
-    supabase.from("billing_periods").select("id, month, year"),
-    supabase.from("house_number").select("id, profile_id, name"),
-  ]);
+  const [profilesRes, paymentsRes, periodsRes, housesRes, blocksRes] =
+    await Promise.all([
+      supabase.from("profiles").select("id, nickname").eq("role", "resident"),
+      supabase.from("payment_methods").select("id, name"),
+      supabase.from("billing_periods").select("id, month, year"),
+      supabase.from("house_number").select("id, profile_id, name"),
+      supabase.from("housing_blocks").select("id, name"),
+    ]);
 
   const profiles = profilesRes.data || [];
   const houses = housesRes.data || [];
@@ -547,6 +560,9 @@ onMounted(async () => {
 
   paymentOptions.value =
     paymentsRes.data?.map((p) => ({ label: p.name, value: p.id })) || [];
+
+  blockOptions.value =
+    blocksRes.data?.map((h) => ({ label: h.name, value: h.id })) || [];
 
   periodOptions.value =
     periodsRes.data?.map((p) => ({
