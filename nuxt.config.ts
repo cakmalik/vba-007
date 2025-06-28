@@ -6,6 +6,7 @@ export default defineNuxtConfig({
     // supabaseKey: '',
 
     public: {
+      supabaseRedirectUrl: process.env.SUPABASE_REDIRECT_URL || 'http://localhost:3000/confirm',
       apiBase: '/api',
       emailRedirect: 'http://localhost:3000/confirm'
     }
