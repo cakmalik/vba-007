@@ -35,6 +35,15 @@
         class="w-full sm:w-1/2 md:w-1/3"
       />
 
+      <!-- Filter  -->
+      <USelectMenu
+        v-model="selectedBlock"
+        :items="blockOptions"
+        option-attribute="label"
+        value-attribute="value"
+        placeholder="Filter Blok"
+        class="w-full sm:w-1/3 md:w-1/4"
+      />
       <!-- Filter Periode -->
       <USelectMenu
         v-model="selectedPeriod"
@@ -42,15 +51,6 @@
         option-attribute="label"
         value-attribute="value"
         placeholder="Filter Periode"
-        class="w-full sm:w-1/3 md:w-1/4"
-      />
-      <!-- Filter Periode -->
-      <USelectMenu
-        v-model="selectedBlock"
-        :items="blockOptions"
-        option-attribute="label"
-        value-attribute="value"
-        placeholder="Filter Blok"
         class="w-full sm:w-1/3 md:w-1/4"
       />
     </div>
