@@ -55,11 +55,11 @@
               {{ profile.is_married ? "Menikah" : "Belum" }}
             </div>
             <div>
-              <strong>Tinggal di Rumah Ini:</strong>
+              <strong>Sudah dihuni:</strong>
               {{ profile.is_living ? "Ya" : "Tidak" }}
             </div>
             <div>
-              <strong>Validasi KTP VBA:</strong>
+              <strong>Sudah Alamat VBA:</strong>
               {{ profile.is_ktp_vba ? "Ya" : "Tidak" }}
             </div>
             <div>
@@ -74,6 +74,66 @@
         </div>
       </template>
     </UModal>
+
+    <UDrawer v-model:open="showHouseNumber">
+      <template #content>
+        <div class="p-4">
+          <div class="flex items-center justify-between">
+            <!-- <h2 class="text-lg font-semibold">Edit Nomor Rumah</h2> -->
+            <UButton
+              icon="i-heroicons-plus"
+              size="xs"
+              @click="addHouseNumberField"
+            >
+              Tambah
+            </UButton>
+          </div>
+          <div class="space-y-4 p-4">
+            <div
+              v-for="(item, index) in houseNumbersCollection"
+              :key="index"
+              class="flex items-center gap-2"
+            >
+              <!--               <pre class="text-xs bg-gray-100 p-2 rounded"> -->
+              <!--   {{ availableHouseNumbers }} -->
+              <!-- </pre -->
+              <USelectMenu
+                v-model="item.id"
+                :items="availableHouseNumbers"
+                value-key="id"
+                placeholder="Pilih Nomor Rumah"
+                class="flex-1"
+              />
+              <!-- <UInput -->
+              <!--   v-model="item.name" -->
+              <!--   placeholder="Nomor Rumah" -->
+              <!--   class="flex-1" -->
+              <!-- /> -->
+              <UButton
+                icon="i-heroicons-x-mark"
+                color="red"
+                variant="ghost"
+                @click="removeHouseNumberField(index)"
+                v-if="houseNumbersCollection.length > 1"
+              />
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2 p-4 border-t">
+            <UButton
+              color="gray"
+              variant="ghost"
+              @click="showHouseNumber = false"
+            >
+              Batal
+            </UButton>
+            <UButton color="primary" @click="saveHouseNumbers">
+              Simpan
+            </UButton>
+          </div>
+        </div>
+      </template>
+    </UDrawer>
   </NuxtLayout>
 </template>
 
@@ -224,6 +284,12 @@ function getRowItems(row: Row<Payment>) {
         showProfile(row.original.id);
       },
     },
+    {
+      label: "Nomor Rumah",
+      onSelect() {
+        showEditHouseNumber(row.original.id);
+      },
+    },
   ];
 }
 
@@ -265,4 +331,146 @@ const prevPage = () => page.value--;
 watch([page, globalFilter], async () => {
   await refresh();
 });
+
+type HouseNumberItem = {
+  id?: string;
+  name: string;
+};
+const houseNumbersCollection = ref<HouseNumberItem[]>([]);
+const showHouseNumber = ref(false);
+
+const selectedProfileId = ref<string | null>(null);
+const showEditHouseNumber = async (id: string) => {
+  selectedProfileId.value = id;
+  const { data, error } = await supabase
+    .from("house_number")
+    .select("id, name")
+    .eq("profile_id", id);
+
+  if (error) {
+    console.log("Gagal fetching data profile", error);
+    return;
+  }
+
+  houseNumbersCollection.value =
+    data?.map((item) => ({
+      name: item.name ?? "", // default kosong jika null
+      id: item.id, // simpan ID jika nanti perlu update
+    })) || [];
+
+  console.log("data house number", data);
+
+  await fetchAvailableHouseNumbers();
+  showHouseNumber.value = true;
+};
+
+// Tambahkan field input baru
+const addHouseNumberField = () => {
+  houseNumbersCollection.value.push({
+    name: "",
+    id: "",
+  });
+};
+
+// Hapus field input berdasarkan index
+const removeHouseNumberField = (index: number) => {
+  houseNumbersCollection.value.splice(index, 1);
+};
+
+const availableHouseNumbers = ref<{ id: string; label: string }[]>([]);
+const fetchAvailableHouseNumbers = async () => {
+  if (!selectedProfileId.value) return;
+
+  // Ambil rumah yang belum dipakai
+  const { data: available, error: err1 } = await supabase
+    .from("house_number")
+    .select("id, name")
+    .is("profile_id", null);
+
+  // Ambil rumah milik profile ini
+  const { data: owned, error: err2 } = await supabase
+    .from("house_number")
+    .select("id, name")
+    .eq("profile_id", selectedProfileId.value);
+
+  if (err1 || err2) {
+    console.error("Gagal mengambil nomor rumah", err1 || err2);
+    return;
+  }
+
+  const merged = [...(available ?? []), ...(owned ?? [])];
+
+  // Hapus duplikat berdasarkan ID (opsional, jika kemungkinan duplikat)
+  const unique = Array.from(
+    new Map(merged.map((item) => [item.id, item])).values(),
+  );
+
+  availableHouseNumbers.value = unique.map((item) => ({
+    id: item.id,
+    label: item.name ?? "",
+  }));
+
+  console.log("Available + owned house numbers:", availableHouseNumbers.value);
+};
+
+watch(showHouseNumber, (val) => {
+  if (val) {
+    console.log("DRAWER OPEN — Available Numbers", availableHouseNumbers.value);
+  }
+});
+
+const saveHouseNumbers = async () => {
+  if (!selectedProfileId.value) return;
+
+  const profileId = selectedProfileId.value;
+
+  // Ambil semua nomor rumah yang sebelumnya dimiliki user
+  const { data: existingHouseNumbers, error: fetchError } = await supabase
+    .from("house_number")
+    .select("id")
+    .eq("profile_id", profileId);
+
+  if (fetchError) {
+    console.error("Gagal mengambil data nomor rumah lama:", fetchError);
+    return;
+  }
+
+  const newIds = houseNumbersCollection.value
+    .map((item) => item.id)
+    .filter((id): id is string => !!id); // hanya ambil ID valid (yang bukan undefined/null)
+
+  const oldIds = (existingHouseNumbers ?? []).map((item) => item.id);
+
+  // ✅ Nomor rumah yang masih dipakai (tidak berubah): skip
+  const toUnassign = oldIds.filter((id) => !newIds.includes(id));
+  const toAssign = newIds.filter((id) => !oldIds.includes(id));
+
+  // 🔄 Unassign nomor rumah yang dihapus dari form (set profile_id = null)
+  if (toUnassign.length > 0) {
+    const { error } = await supabase
+      .from("house_number")
+      .update({ profile_id: null })
+      .in("id", toUnassign);
+
+    if (error) {
+      console.error("Gagal unassign nomor rumah:", error);
+    }
+  }
+
+  // 🔄 Assign nomor rumah baru ke profile
+  if (toAssign.length > 0) {
+    const { error } = await supabase
+      .from("house_number")
+      .update({ profile_id: profileId })
+      .in("id", toAssign);
+
+    if (error) {
+      console.error("Gagal assign nomor rumah baru:", error);
+    }
+  }
+
+  console.log("Simpan nomor rumah selesai");
+  showHouseNumber.value = false;
+  await refresh(); // refresh data utama
+};
 </script>

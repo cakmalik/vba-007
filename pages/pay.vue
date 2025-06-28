@@ -4,7 +4,7 @@
       <h1>
         Mohon Maaf masih
         <br />
-        dalam tahap development !
+        dalam tahap pengembangan !
       </h1>
     </div>
   </NuxtLayout>

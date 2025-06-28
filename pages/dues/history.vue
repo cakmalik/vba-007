@@ -104,9 +104,9 @@
               :items="profileOptions"
               option-attribute="label"
               value-attribute="value"
-              label="Profil"
+              label="Profil warga"
               placeholder="Pilih profil"
-              class="w-48"
+              class="w-full sm:w-1/2 md:w-1/4"
             />
 
             <USelectMenu
@@ -116,7 +116,7 @@
               value-attribute="value"
               label="No Rumah"
               placeholder="Pilih no rumah"
-              class="w-48"
+              class="w-full sm:w-1/2 md:w-1/4"
             />
 
             <USelectMenu
@@ -126,7 +126,7 @@
               value-attribute="value"
               label="Periode"
               placeholder="Pilih periode"
-              class="w-48"
+              class="w-full sm:w-1/2 md:w-1/4"
             />
 
             <USelectMenu
@@ -136,7 +136,7 @@
               value-attribute="value"
               label="Metode Pembayaran"
               placeholder="Pilih metode"
-              class="w-48"
+              class="w-full sm:w-1/2 md:w-1/4"
             />
 
             <USelectMenu
@@ -148,18 +148,20 @@
               option-attribute="label"
               value-attribute="value"
               label="Status"
-              class="w-48"
+              class="w-full sm:w-1/2 md:w-1/4"
             />
 
             <UInput
               v-model="form.amount_override"
               type="number"
               label="Jumlah Override"
+              class="w-1/2 sm:w-1/2 md:w-1/4"
             />
             <UInput
               v-model="form.due_date"
               type="date"
               label="Jatuh Tempo"
+              class="w-grow sm:w-1/2 md:w-1/4"
               required
             />
 
