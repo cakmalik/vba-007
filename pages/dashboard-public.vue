@@ -22,7 +22,7 @@
         </ul>
       </UCard>
 
-      <!-- Keuangan (dummy) -->
+      <!-- Keuangan -->
       <UCard variant="soft">
         <template #header>
           <h2 class="text-lg font-medium">Keuangan</h2>
@@ -49,6 +49,7 @@
     </div>
   </NuxtLayout>
 </template>
+
 <script setup lang="ts">
 definePageMeta({
   title: "Dashboard",
@@ -56,7 +57,7 @@ definePageMeta({
 
 const supabase = useSupabaseClient();
 
-// 🔹 Fetch Data Warga dari Supabase
+// 🔹 Fetch Data Warga
 const { data: wargaData } = await useAsyncData("warga", async () => {
   const { data, error } = await supabase
     .from("profiles")
@@ -67,16 +68,16 @@ const { data: wargaData } = await useAsyncData("warga", async () => {
   return data;
 });
 
-// 🔹 Komputasi Data
+// 🔹 Komputasi Jumlah
 const totalWarga = computed(() => wargaData.value?.length ?? 0);
 const jumlahTinggal = computed(
-  () => wargaData.value?.filter((w) => w.is_living === true).length ?? 0,
+  () => wargaData.value?.filter((w) => w.is_living).length ?? 0,
 );
 const jumlahVBA = computed(
-  () => wargaData.value?.filter((w) => w.is_ktp_vba === true).length ?? 0,
+  () => wargaData.value?.filter((w) => w.is_ktp_vba).length ?? 0,
 );
 
-// 🔹 Data Keuangan Dummy
+// 🔹 Reactive Keuangan
 const keuangan = reactive({
   pemasukan: 0,
   pengeluaran: 0,
@@ -89,8 +90,8 @@ function formatCurrency(value: number): string {
   return value.toLocaleString("id-ID");
 }
 
-const { data, error } = await useAsyncData("keuanganLunas", async () => {
-  // Step 1: Ambil billing_period terbaru
+// 🔹 Ambil Data Keuangan (Lunas Iuran)
+const { data: keuanganData } = await useAsyncData("keuanganLunas", async () => {
   const { data: latestPeriod, error: periodError } = await supabase
     .from("billing_periods")
     .select("id, month, year")
@@ -104,7 +105,6 @@ const { data, error } = await useAsyncData("keuanganLunas", async () => {
 
   const { id: billing_period_id, month, year } = latestPeriod;
 
-  // Step 2: Hitung jumlah profile_dues yang sudah lunas untuk periode tersebut
   const { data: duesData, error: duesError } = await supabase
     .from("profile_dues")
     .select("id")
@@ -113,15 +113,22 @@ const { data, error } = await useAsyncData("keuanganLunas", async () => {
 
   if (duesError) throw duesError;
 
-  // Step 3: Format bulan dan simpan ke state
   const bulanNama = new Date(year, month - 1).toLocaleString("id-ID", {
     month: "long",
     year: "numeric",
   });
 
-  keuangan.lunas = duesData?.length || 0;
-  keuangan.bulan_tahun = bulanNama;
+  return {
+    lunas: duesData?.length || 0,
+    bulan_tahun: bulanNama,
+  };
+});
 
-  return { lunas: keuangan.lunas, bulan_tahun: bulanNama };
+// 🔹 Sinkronkan hasil keuanganData ke state reactive keuangan
+watchEffect(() => {
+  if (keuanganData.value) {
+    keuangan.lunas = keuanganData.value.lunas;
+    keuangan.bulan_tahun = keuanganData.value.bulan_tahun;
+  }
 });
 </script>
