@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-dark text-neutral-200 flex flex-col">
     <div class="fixed top-0 right-0 p-4 z-50">
       <ColorModeButton />
-      <UButton to="/login" variant="ghost" icon="i-lucide-log-in" />
+      <UButton to="/login" variant="default" icon="i-lucide-key-round" />
     </div>
     <!-- Main Layout -->
     <div class="flex-1 flex flex-col items-center px-4 sm:px-6 lg:px-8 py-6">

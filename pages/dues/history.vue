@@ -544,7 +544,10 @@ onMounted(async () => {
     await Promise.all([
       supabase.from("profiles").select("id, nickname").eq("role", "resident"),
       supabase.from("payment_methods").select("id, name"),
-      supabase.from("billing_periods").select("id, month, year"),
+      supabase
+        .from("billing_periods")
+        .select("id, month, year")
+        .order("id", { ascending: false }),
       supabase.from("house_number").select("id, profile_id, name"),
       supabase.from("housing_blocks").select("id, name"),
     ]);

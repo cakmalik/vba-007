@@ -41,7 +41,7 @@
             </span>
           </li>
           <li class="flex justify-between">
-            <span>Lunas Iuran Bulan Ini</span>
+            <span>Lunas Iuran {{ keuangan.bulan_tahun }}</span>
             <span class="font-semibold">{{ keuangan.lunas }} warga</span>
           </li>
         </ul>
