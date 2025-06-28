@@ -32,7 +32,7 @@ export default defineNuxtConfig({
   supabase: {
     redirect: true,
     redirectOptions: {
-      login: '/login',
+      login: '/dashboard-public',
       callback: '/confirm',
       exclude: ['/login', '/confirm', '/dues/history', '/cashflow', '/pay', '/dashboard-public'],
     }
