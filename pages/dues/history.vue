@@ -28,7 +28,9 @@
     <!-- Filter Row -->
     <div class="flex justify-between flex-wrap items-center mb-4 gap-2">
       <!-- Pencarian Nama -->
+
       <UInput
+        v-if="isTreasurer"
         v-model="searchName"
         placeholder="Cari nama atau panggilan..."
         icon="i-heroicons-magnifying-glass"
@@ -187,6 +189,7 @@ import { useDateFormat } from "@vueuse/core";
 import type { TableColumn } from "@nuxt/ui";
 import { UButton } from "#components";
 import { getRoleName } from "@/composables/useRole";
+import { useDebounce } from "@vueuse/core";
 
 const UAvatar = resolveComponent("UAvatar");
 
@@ -203,32 +206,60 @@ const selectedPeriod = ref(null);
 const selectedBlock = ref(null);
 const totalAmount = ref(0);
 
-watch([page, searchName, selectedPeriod, selectedBlock], () => {
+const debouncedSearchName = useDebounce(searchName, 400);
+
+watch(page, () => {
   refresh();
   fetchTotalAmount();
 });
+
+watch([debouncedSearchName, selectedPeriod, selectedBlock], () => {
+  page.value = 1;
+  refresh();
+  fetchTotalAmount();
+});
+
 async function fetchTotalAmount() {
   let query = supabase
     .from("profile_dues")
-    .select(
-      "amount_override, profiles!profile_dues_profile_id_fkey(nickname, full_name)",
-    );
+    .select("amount_override, profiles(nickname, full_name)");
 
-  // Filter nama
-  const term = searchName.value.trim();
+  const term = debouncedSearchName.value.trim();
+
   if (term) {
-    query = query.or(
-      `profiles.full_name.ilike.%${term}%,profiles.nickname.ilike.%${term}%`,
+    // NOTE: Supabase tidak bisa pakai .or() dengan nested fields
+    // Jadi ambil semua dulu, lalu filter manual
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Gagal ambil total:", error);
+      totalAmount.value = 0;
+      return;
+    }
+
+    const filtered = data.filter((item) => {
+      const name = item.profiles?.full_name?.toLowerCase() ?? "";
+      const nick = item.profiles?.nickname?.toLowerCase() ?? "";
+      return (
+        name.includes(term.toLowerCase()) || nick.includes(term.toLowerCase())
+      );
+    });
+
+    totalAmount.value = filtered.reduce(
+      (sum, item) => sum + (item.amount_override || 0),
+      0,
     );
+    return;
   }
 
-  // Filter periode
+  // Jika tidak ada pencarian nama, lanjut query normal
   if (selectedPeriod.value) {
     const periodId = selectedPeriod.value.value ?? selectedPeriod.value;
     query = query.eq("billing_period_id", periodId);
   }
 
   const { data, error } = await query;
+
   if (error) {
     console.error("Gagal ambil total:", error);
     totalAmount.value = 0;
@@ -240,7 +271,40 @@ async function fetchTotalAmount() {
     0,
   );
 }
-
+// async function fetchTotalAmount() {
+//   let query = supabase
+//     .from("profile_dues")
+//     .select(
+//       "amount_override, profiles!profile_dues_profile_id_fkey(nickname, full_name)",
+//     );
+//
+//   // Filter nama
+//   const term = debouncedSearchName.value.trim();
+//   if (term) {
+//     query = query.or(
+//       `profiles.full_name.ilike.%${term}%,profiles.nickname.ilike.%${term}%`,
+//     );
+//   }
+//
+//   // Filter periode
+//   if (selectedPeriod.value) {
+//     const periodId = selectedPeriod.value.value ?? selectedPeriod.value;
+//     query = query.eq("billing_period_id", periodId);
+//   }
+//
+//   const { data, error } = await query;
+//   if (error) {
+//     console.error("Gagal ambil total:", error);
+//     totalAmount.value = 0;
+//     return;
+//   }
+//
+//   totalAmount.value = data.reduce(
+//     (sum, item) => sum + (item.amount_override || 0),
+//     0,
+//   );
+// }
+//
 // Ambil data iuran
 const {
   data: duesData,
@@ -248,14 +312,14 @@ const {
   pending,
 } = await useAsyncData(
   () =>
-    `profile-dues-page-${page.value}-${searchName.value}-${selectedPeriod.value}`,
+    `profile-dues-page-${page.value}-${debouncedSearchName.value}-${selectedPeriod.value}`,
   async () => {
     let query = supabase
       .from("profile_dues")
       .select(
         `
         *,
-        profiles!profile_dues_profile_id_fkey(nickname, full_name, image_url ),
+        profiles!profile_dues_profile_id_fkey(nickname, full_name, image_url),
         house_number:house_number_id!inner(name, housing_block_id),
         payment_methods!profile_dues_payment_method_id_fkey(name),
         billing_periods!fk_period(month, year)
@@ -265,7 +329,7 @@ const {
       .order("due_date", { ascending: false });
 
     // Filter nama
-    const term = searchName.value.trim();
+    const term = debouncedSearchName.value.trim();
     if (term) {
       query = query.or(
         `profiles.full_name.ilike.%${term}%,profiles.nickname.ilike.%${term}%`,
