@@ -208,14 +208,14 @@ const totalAmount = ref(0);
 
 const debouncedSearchName = useDebounce(searchName, 400);
 
-watch(page, () => {
-  refresh();
+watch(page, async () => {
+  await refresh();
   fetchTotalAmount();
 });
 
-watch([debouncedSearchName, selectedPeriod, selectedBlock], () => {
+watch([debouncedSearchName, selectedPeriod, selectedBlock], async () => {
   page.value = 1;
-  refresh();
+  await refresh();
   fetchTotalAmount();
 });
 
@@ -271,49 +271,22 @@ async function fetchTotalAmount() {
     0,
   );
 }
-// async function fetchTotalAmount() {
-//   let query = supabase
-//     .from("profile_dues")
-//     .select(
-//       "amount_override, profiles!profile_dues_profile_id_fkey(nickname, full_name)",
-//     );
-//
-//   // Filter nama
-//   const term = debouncedSearchName.value.trim();
-//   if (term) {
-//     query = query.or(
-//       `profiles.full_name.ilike.%${term}%,profiles.nickname.ilike.%${term}%`,
-//     );
-//   }
-//
-//   // Filter periode
-//   if (selectedPeriod.value) {
-//     const periodId = selectedPeriod.value.value ?? selectedPeriod.value;
-//     query = query.eq("billing_period_id", periodId);
-//   }
-//
-//   const { data, error } = await query;
-//   if (error) {
-//     console.error("Gagal ambil total:", error);
-//     totalAmount.value = 0;
-//     return;
-//   }
-//
-//   totalAmount.value = data.reduce(
-//     (sum, item) => sum + (item.amount_override || 0),
-//     0,
-//   );
-// }
-//
-// Ambil data iuran
+
 const {
   data: duesData,
   refresh,
   pending,
 } = await useAsyncData(
   () =>
-    `profile-dues-page-${page.value}-${debouncedSearchName.value}-${selectedPeriod.value}`,
+    `profile-dues-page-${page.value}-${debouncedSearchName.value}-${selectedPeriod.value}-${selectedBlock.value}`,
   async () => {
+    const term = debouncedSearchName.value.trim().toLowerCase();
+    const periodId = selectedPeriod.value?.value ?? selectedPeriod.value;
+    const blockId = selectedBlock.value?.value;
+    console.log("term", term);
+    console.log("periodId", periodId);
+    console.log("blockId baru", blockId);
+
     let query = supabase
       .from("profile_dues")
       .select(
@@ -328,33 +301,32 @@ const {
       .range(from.value, to.value)
       .order("due_date", { ascending: false });
 
-    // Filter nama
-    const term = debouncedSearchName.value.trim();
-    if (term) {
-      query = query.or(
-        `profiles.full_name.ilike.%${term}%,profiles.nickname.ilike.%${term}%`,
-      );
-    }
-
     // Filter periode
-    if (selectedPeriod.value) {
-      const periodId = selectedPeriod.value.value ?? selectedPeriod.value;
+    if (periodId) {
       query = query.eq("billing_period_id", periodId);
     }
 
-    if (selectedBlock.value) {
-      const blockId = selectedBlock.value.value ?? selectedBlock.value;
+    if (blockId !== null && blockId !== "all") {
       query = query.eq("house_number.housing_block_id", blockId);
     }
 
     const { data, error } = await query;
 
     if (error) throw error;
-    console.log("hasil query", data);
-    hasNextPage.value = data.length === pageSize;
-    return data;
+
+    // Manual filter pencarian nama (karena Supabase tidak mendukung `or()` di relasi)
+    const filtered = data.filter((item) => {
+      const fullName = item.profiles?.full_name?.toLowerCase() ?? "";
+      const nickname = item.profiles?.nickname?.toLowerCase() ?? "";
+      return !term || fullName.includes(term) || nickname.includes(term);
+    });
+
+    hasNextPage.value = filtered.length === pageSize;
+
+    return filtered;
   },
 );
+
 const nextPage = () => page.value++;
 const prevPage = () => page.value--;
 
@@ -633,37 +605,15 @@ onMounted(async () => {
       value: { profile_id: p.id, house_id: house.id },
     }));
   });
-  // profileOptions.value = profiles.flatMap((p) => {
-  //   const housesForProfile = houses.filter((h) => h.profile_id === p.id);
-  //   const nickname = p.nickname.toLowerCase();
-  //
-  //   if (housesForProfile.length === 0) {
-  //     return [{ label: nickname, value: p.id }];
-  //   }
-  //
-  //   return housesForProfile.map((house) => ({
-  //     label: `${nickname} - ${house.name}`,
-  //     value: `${p.id}-${house.id}`, // value unik jika ingin bedakan antar rumah
-  //   }));
-  // });
-  // profileOptions.value = profiles.map((p) => {
-  //   const house = houses.find((h) => h.profile_id === p.id);
-  //   const nickname = p.nickname.toLowerCase();
-  //   const label = house ? `${nickname} - ${house.name}` : nickname;
-  //   return { label, value: p.id };
-  // });
-
-  // profileOptions.value = profiles.map((p) => {
-  //   const house = houses.find((h) => h.profile_id === p.id);
-  //   const label = house ? `${house.name} - ${p.nickname}` : p.nickname;
-  //   return { label, value: p.id };
-  // });
 
   paymentOptions.value =
     paymentsRes.data?.map((p) => ({ label: p.name, value: p.id })) || [];
 
-  blockOptions.value =
-    blocksRes.data?.map((h) => ({ label: h.name, value: h.id })) || [];
+  blockOptions.value = [
+    { label: "Semua Blok", value: null },
+    ...(blocksRes.data?.map((h) => ({ label: h.name, value: h.id })) || []),
+  ];
+  selectedBlock.value = blockOptions.value[0];
 
   periodOptions.value =
     periodsRes.data?.map((p) => ({
