@@ -631,9 +631,10 @@ const getHouseNumbers = async () => {
   console.log("data nomer rumah", data);
   houseOptions.value = data.map((h) => ({ label: h.name, value: h.id }));
 
-  //if exists set default house number
-  if (houseOptions.value.length > 0) {
-    form.value.house_number_id = houseOptions.value[0];
+  if (houseOptions.value.length === 1) {
+    form.value.house_number_id = houseOptions.value[0].value;
+  } else {
+    form.value.house_number_id = null; // atau biarkan user pilih
   }
 };
 
