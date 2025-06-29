@@ -555,12 +555,25 @@ onMounted(async () => {
   const profiles = profilesRes.data || [];
   const houses = housesRes.data || [];
 
-  profileOptions.value = profiles.map((p) => {
-    const house = houses.find((h) => h.profile_id === p.id);
+  profileOptions.value = profiles.flatMap((p) => {
+    const housesForProfile = houses.filter((h) => h.profile_id === p.id);
     const nickname = p.nickname.toLowerCase();
-    const label = house ? `${nickname} - ${house.name}` : nickname;
-    return { label, value: p.id };
+
+    if (housesForProfile.length === 0) {
+      return [{ label: nickname, value: p.id }];
+    }
+
+    return housesForProfile.map((house) => ({
+      label: `${nickname} - ${house.name}`,
+      value: `${p.id}-${house.id}`, // value unik jika ingin bedakan antar rumah
+    }));
   });
+  // profileOptions.value = profiles.map((p) => {
+  //   const house = houses.find((h) => h.profile_id === p.id);
+  //   const nickname = p.nickname.toLowerCase();
+  //   const label = house ? `${nickname} - ${house.name}` : nickname;
+  //   return { label, value: p.id };
+  // });
 
   // profileOptions.value = profiles.map((p) => {
   //   const house = houses.find((h) => h.profile_id === p.id);
