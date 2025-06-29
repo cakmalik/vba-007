@@ -329,6 +329,8 @@ const prevPage = () => page.value--;
 
 // Refresh saat ganti page
 watch([page, globalFilter], async () => {
+  // set page ke 1 saat ganti global filter
+  if (globalFilter.value) page.value = 1;
   await refresh();
 });
 
