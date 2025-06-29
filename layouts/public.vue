@@ -82,6 +82,21 @@
 </template>
 
 <script setup lang="ts">
+useHead({
+  title: "RT007 VBA",
+  meta: [
+    { name: "description", content: "Aplikasi Keuangan RT007 VBA" },
+    { property: "og:title", content: "VBA 007" },
+    { property: "og:description", content: "Aplikasi Keuangan RT007" },
+    {
+      property: "og:image",
+      content:
+        "https://yt3.googleusercontent.com/6bTCEIbjoxCLTG92A55OUhjXYLaAywxqwQP6c3jwjwjkMZCJPUWNZy6KO1L0WzOAaPWchTReFJ8=s900-c-k-c0x00ffffff-no-rj",
+    },
+    { property: "og:url", content: "https://vba-007.vercel.app" },
+    { property: "og:type", content: "website" },
+  ],
+});
 const route = useRoute();
 
 const pageTitle = computed(() => route.meta.title || "Dashboard");
