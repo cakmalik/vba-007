@@ -435,10 +435,11 @@ function editData(id: number) {
   showForm.value = true;
 }
 
+// .eq("id", form.value.profile_id?.value?.house_id);
 function mapFormToPayload(form: any) {
   return {
-    profile_id: form.profile_id?.value ?? form.profile_id,
-    house_number_id: form.house_number_id?.value ?? form.house_number_id,
+    profile_id: form.profile_id?.value?.profile_id ?? form.profile_id,
+    house_number_id: form.profile_id?.value?.house_id ?? form.house_number_id,
     billing_period_id: form.billing_period_id?.value ?? form.billing_period_id,
     payment_method_id: form.payment_method_id?.value ?? form.payment_method_id,
     amount_override: form.amount_override,
@@ -560,14 +561,27 @@ onMounted(async () => {
     const nickname = p.nickname.toLowerCase();
 
     if (housesForProfile.length === 0) {
-      return [{ label: nickname, value: p.id }];
+      return [{ label: nickname, value: { profile_id: p.id, house_id: null } }];
     }
 
     return housesForProfile.map((house) => ({
       label: `${nickname} - ${house.name}`,
-      value: `${p.id}-${house.id}`, // value unik jika ingin bedakan antar rumah
+      value: { profile_id: p.id, house_id: house.id },
     }));
   });
+  // profileOptions.value = profiles.flatMap((p) => {
+  //   const housesForProfile = houses.filter((h) => h.profile_id === p.id);
+  //   const nickname = p.nickname.toLowerCase();
+  //
+  //   if (housesForProfile.length === 0) {
+  //     return [{ label: nickname, value: p.id }];
+  //   }
+  //
+  //   return housesForProfile.map((house) => ({
+  //     label: `${nickname} - ${house.name}`,
+  //     value: `${p.id}-${house.id}`, // value unik jika ingin bedakan antar rumah
+  //   }));
+  // });
   // profileOptions.value = profiles.map((p) => {
   //   const house = houses.find((h) => h.profile_id === p.id);
   //   const nickname = p.nickname.toLowerCase();
@@ -619,10 +633,11 @@ watch(
 );
 
 const getHouseNumbers = async () => {
+  console.log("profile id", form.value.profile_id);
   const { data, error } = await supabase
     .from("house_number")
     .select("id, profile_id, name")
-    .eq("profile_id", form.value.profile_id?.value);
+    .eq("id", form.value.profile_id?.value?.house_id);
   if (error) {
     console.error("Error fetching house numbers:", error);
     return;
@@ -631,10 +646,9 @@ const getHouseNumbers = async () => {
   console.log("data nomer rumah", data);
   houseOptions.value = data.map((h) => ({ label: h.name, value: h.id }));
 
-  if (houseOptions.value.length === 1) {
-    form.value.house_number_id = houseOptions.value[0].value;
-  } else {
-    form.value.house_number_id = null; // atau biarkan user pilih
+  //if exists set default house number
+  if (houseOptions.value.length > 0) {
+    form.value.house_number_id = houseOptions.value[0];
   }
 };
 
