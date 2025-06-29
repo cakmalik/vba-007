@@ -90,20 +90,20 @@ function formatCurrency(value: number): string {
   return value.toLocaleString("id-ID");
 }
 
-// 🔹 Ambil Data Keuangan (Lunas Iuran)
+const today = new Date().toISOString().split("T")[0]; // format YYYY-MM-DD
+
 const { data: keuanganData } = await useAsyncData("keuanganLunas", async () => {
-  const { data: latestPeriod, error: periodError } = await supabase
+  const { data: currentPeriod, error: periodError } = await supabase
     .from("billing_periods")
-    .select("id, month, year")
-    .order("year", { ascending: false })
-    .order("month", { ascending: false })
-    .limit(1)
+    .select("id, month, year, start_date, end_date")
+    .lte("start_date", today)
+    .gte("end_date", today)
     .single();
 
-  if (periodError || !latestPeriod)
-    throw periodError || new Error("Tidak ada data periode");
+  if (periodError || !currentPeriod)
+    throw periodError || new Error("Tidak ada periode tagihan untuk hari ini");
 
-  const { id: billing_period_id, month, year } = latestPeriod;
+  const { id: billing_period_id, month, year } = currentPeriod;
 
   const { data: duesData, error: duesError } = await supabase
     .from("profile_dues")
@@ -123,7 +123,40 @@ const { data: keuanganData } = await useAsyncData("keuanganLunas", async () => {
     bulan_tahun: bulanNama,
   };
 });
-
+// 🔹 Ambil Data Keuangan (Lunas Iuran)
+// const { data: keuanganData } = await useAsyncData("keuanganLunas", async () => {
+//   const { data: latestPeriod, error: periodError } = await supabase
+//     .from("billing_periods")
+//     .select("id, month, year")
+//     .order("year", { ascending: false })
+//     .order("month", { ascending: false })
+//     .limit(1)
+//     .single();
+//
+//   if (periodError || !latestPeriod)
+//     throw periodError || new Error("Tidak ada data periode");
+//
+//   const { id: billing_period_id, month, year } = latestPeriod;
+//
+//   const { data: duesData, error: duesError } = await supabase
+//     .from("profile_dues")
+//     .select("id")
+//     .eq("billing_period_id", billing_period_id)
+//     .eq("status", "paid");
+//
+//   if (duesError) throw duesError;
+//
+//   const bulanNama = new Date(year, month - 1).toLocaleString("id-ID", {
+//     month: "long",
+//     year: "numeric",
+//   });
+//
+//   return {
+//     lunas: duesData?.length || 0,
+//     bulan_tahun: bulanNama,
+//   };
+// });
+//
 // 🔹 Sinkronkan hasil keuanganData ke state reactive keuangan
 watchEffect(() => {
   if (keuanganData.value) {
