@@ -375,13 +375,13 @@ const columns: TableColumn[] = [
     cell: ({ row }) => {
       const avatarSrc =
         getProxyImageUrl(row.original.profiles.image_url) ||
-        `https://ui-avatars.com/api/?name=${encodeURIComponent(row.original.full_name)}`;
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(row.original.profiles.full_name)}`;
 
       return h("div", { class: "flex items-center gap-3" }, [
         h("div", { class: "w-8 h-8 rounded-full overflow-hidden" }, [
           h("img", {
             src: avatarSrc,
-            alt: row.original.full_name,
+            alt: row.original.profiles.full_name,
             class: "w-full h-full object-cover",
           }),
         ]),
