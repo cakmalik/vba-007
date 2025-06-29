@@ -30,14 +30,20 @@
         <ul class="space-y-2">
           <li class="flex justify-between">
             <span>Pemasukan</span>
-            <span class="font-semibold text-green-600 dark:text-green-400">
-              Rp {{ formatCurrency(keuangan.pemasukan) }}
+            <span class="font-semibold text-yellow-600 dark:text-yellow-400">
+              Rp {{ formatCurrency(uangMasuk) }}
             </span>
           </li>
           <li class="flex justify-between">
             <span>Pengeluaran</span>
             <span class="font-semibold text-red-600 dark:text-red-400">
-              Rp {{ formatCurrency(keuangan.pengeluaran) }}
+              Rp {{ formatCurrency(uangKeluar) }}
+            </span>
+          </li>
+          <li class="flex justify-between">
+            <span>Saldo</span>
+            <span class="font-semibold text-green-600 dark:text-green-400">
+              Rp {{ formatCurrency(uangMasuk - uangKeluar) }}
             </span>
           </li>
           <li class="flex justify-between">
@@ -79,8 +85,8 @@ const jumlahVBA = computed(
 
 // 🔹 Reactive Keuangan
 const keuangan = reactive({
-  pemasukan: 0,
-  pengeluaran: 0,
+  // pemasukan: 0,
+  // pengeluaran: 0,
   lunas: 0,
   bulan_tahun: "",
 });
@@ -123,41 +129,37 @@ const { data: keuanganData } = await useAsyncData("keuanganLunas", async () => {
     bulan_tahun: bulanNama,
   };
 });
-// 🔹 Ambil Data Keuangan (Lunas Iuran)
-// const { data: keuanganData } = await useAsyncData("keuanganLunas", async () => {
-//   const { data: latestPeriod, error: periodError } = await supabase
-//     .from("billing_periods")
-//     .select("id, month, year")
-//     .order("year", { ascending: false })
-//     .order("month", { ascending: false })
-//     .limit(1)
-//     .single();
-//
-//   if (periodError || !latestPeriod)
-//     throw periodError || new Error("Tidak ada data periode");
-//
-//   const { id: billing_period_id, month, year } = latestPeriod;
-//
-//   const { data: duesData, error: duesError } = await supabase
-//     .from("profile_dues")
-//     .select("id")
-//     .eq("billing_period_id", billing_period_id)
-//     .eq("status", "paid");
-//
-//   if (duesError) throw duesError;
-//
-//   const bulanNama = new Date(year, month - 1).toLocaleString("id-ID", {
-//     month: "long",
-//     year: "numeric",
-//   });
-//
-//   return {
-//     lunas: duesData?.length || 0,
-//     bulan_tahun: bulanNama,
-//   };
-// });
-//
-// 🔹 Sinkronkan hasil keuanganData ke state reactive keuangan
+
+const { data: uangKeluar, error: errorKeluar } = await useAsyncData(
+  "uang-keluar",
+  async () => {
+    const { data, error } = await supabase
+      .from("cash_flows")
+      .select("amount", { head: false })
+      .eq("type", "out");
+
+    if (error) throw error;
+
+    const total = data.reduce((sum, row) => sum + (row.amount || 0), 0);
+    return total;
+  },
+);
+
+const { data: uangMasuk, error: errorMasuk } = await useAsyncData(
+  "uang-masuk",
+  async () => {
+    const { data, error } = await supabase
+      .from("cash_flows")
+      .select("amount", { head: false })
+      .eq("type", "in");
+
+    if (error) throw error;
+
+    const total = data.reduce((sum, row) => sum + (row.amount || 0), 0);
+    return total;
+  },
+);
+
 watchEffect(() => {
   if (keuanganData.value) {
     keuangan.lunas = keuanganData.value.lunas;

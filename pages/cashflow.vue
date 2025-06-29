@@ -336,7 +336,8 @@ const submitForm = async () => {
   let error;
 
   if (!isEdit.value) {
-    ({ error } = await supabase.from("cash_flows").insert(form.value));
+    const { id, ...payload } = form.value;
+    ({ error } = await supabase.from("cash_flows").insert(payload));
   } else {
     ({ error } = await supabase
       .from("cash_flows")
@@ -355,6 +356,7 @@ const submitForm = async () => {
   }
 
   await refresh();
+  await refreshNuxtData("cashflow-summary");
   showForm.value = false;
 };
 
