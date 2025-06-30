@@ -5,7 +5,7 @@
     <div class="w-full max-w-sm p-6 shadow-md space-y-4">
       <h1 class="text-center text-2xl mb-14">007</h1>
       <UButton
-        label="Sign In with Google"
+        label="Masuk dengan Google"
         block
         icon="i-simple-icons-google"
         color="primary"
