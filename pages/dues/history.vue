@@ -143,11 +143,11 @@
             class="flex flex-wrap gap-4 items-end"
           >
             <USelectMenu
-              v-model="form.profile_id"
               :items="profileOptions"
-              label="Profil warga"
-              placeholder="Pilih profil"
-              class="w-full sm:w-1/2 md:w-1/4"
+              icon="i-lucide-user"
+              v-model="selected_profile_id"
+              placeholder="Pilih Profile"
+              class="w-48"
             />
 
             <USelectMenu
@@ -227,10 +227,26 @@ import type { TableColumn } from "@nuxt/ui";
 import { UButton } from "#components";
 import { getRoleName } from "@/composables/useRole";
 import { useDebounce } from "@vueuse/core";
+import type { AvatarProps } from "@nuxt/ui";
 
 const UAvatar = resolveComponent("UAvatar");
 
 const supabase = useSupabaseClient();
+
+const { data: users, status } = await useFetch(
+  "https://jsonplaceholder.typicode.com/users",
+  {
+    key: "typicode-users",
+    transform: (data: { id: number; name: string }[]) => {
+      return data?.map((user) => ({
+        label: user.name,
+        value: String(user.id),
+        avatar: { src: `https://i.pravatar.cc/120?img=${user.id}` },
+      }));
+    },
+    lazy: true,
+  },
+);
 
 // Pagination
 const page = ref(1);
@@ -458,6 +474,7 @@ const columns: TableColumn[] = [
 
 // Form
 const showForm = ref(false);
+const selected_profile_id = ref(null);
 const form = ref({
   id: undefined,
   profile_id: "",
@@ -677,25 +694,27 @@ onMounted(async () => {
 });
 
 watch(
-  () => form.value.profile_id,
+  () => selected_profile_id.value,
   async (newVal) => {
     await getHouseNumbers();
   },
 );
 
 const getHouseNumbers = async () => {
-  console.log("profile id", form.value.profile_id);
-  const { data, error } = await supabase
+  const houseId = selected_profile_id.value?.value?.house_id;
+  // console.log("profileIdOk", profileIdOk);
+  const { data: nomerRumah, error } = await supabase
     .from("house_number")
     .select("id, profile_id, name")
-    .eq("id", form.value.profile_id?.value?.house_id);
+    .eq("id", houseId);
+
   if (error) {
     console.error("Error fetching house numbers:", error);
     return;
   }
 
-  console.log("data nomer rumah", data);
-  houseOptions.value = data.map((h) => ({ label: h.name, value: h.id }));
+  console.log("data nomer rumah", nomerRumah);
+  houseOptions.value = nomerRumah.map((h) => ({ label: h.name, value: h.id }));
 
   //if exists set default house number
   if (houseOptions.value.length > 0) {
