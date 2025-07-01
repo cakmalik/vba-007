@@ -25,15 +25,15 @@
         <ul class="flex justify-around items-center h-16">
           <li>
             <NuxtLink
-              to="/dashboard-public"
+              to="/resident"
               class="flex flex-col items-center text-gray-600 dark:text-gray-300 hover:text-primary-600"
               :class="{
                 'text-primary-600 dark:text-primary-600 font-semibold':
-                  $route.path === '/dashboard-public',
+                  $route.path === '/resident/index',
               }"
             >
-              <UIcon name="i-lucide-house" class="size-5" />
-              <span class="text-xs">Beranda</span>
+              <UIcon name="i-lucide-users" class="size-5" />
+              <span class="text-xs">Tonggo</span>
             </NuxtLink>
           </li>
           <li>
@@ -47,6 +47,19 @@
             >
               <UIcon name="i-lucide-history" class="size-5" />
               <span class="text-xs">Iuran</span>
+            </NuxtLink>
+          </li>
+          <li>
+            <NuxtLink
+              to="/dashboard-public"
+              class="flex flex-col items-center text-gray-600 dark:text-gray-300 hover:text-primary-600"
+              :class="{
+                'text-primary-600 dark:text-primary-600 font-semibold':
+                  $route.path === '/dashboard-public',
+              }"
+            >
+              <UIcon name="i-lucide-house" class="size-5" />
+              <span class="text-xs">Beranda</span>
             </NuxtLink>
           </li>
           <li>

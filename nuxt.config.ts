@@ -34,7 +34,7 @@ export default defineNuxtConfig({
     redirectOptions: {
       login: '/dashboard-public',
       callback: '/confirm',
-      exclude: ['/login', '/confirm', '/dues/history', '/cashflow', '/pay', '/dashboard-public'],
+      exclude: ['/login', '/confirm', '/dues/history', '/cashflow', '/pay', '/dashboard-public', '/resident'],
     }
   }
   // image: {

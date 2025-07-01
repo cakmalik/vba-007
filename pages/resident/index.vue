@@ -5,7 +5,7 @@
         <UInput
           v-model="globalFilter"
           class="max-w-sm"
-          placeholder="Filter..."
+          placeholder="Golek tonggo here..."
         />
       </div>
       <UTable
@@ -142,6 +142,8 @@ import { h, resolveComponent } from "vue";
 import type { TableColumn } from "@nuxt/ui";
 import type { Row } from "@tanstack/vue-table";
 import { useClipboard } from "@vueuse/core";
+import { getRoleName } from "@/composables/useRole";
+
 const UAvatar = resolveComponent("UAvatar");
 const UButton = resolveComponent("UButton");
 const UBadge = resolveComponent("UBadge");
@@ -153,9 +155,10 @@ const defineShortcuts = () => {
 };
 
 definePageMeta({
-  title: "Data Warga",
-  subtitle: "Kelola Data Warga RT007",
+  title: "Tonggoku",
+  subtitle: "Tonggoku yo dulurku..",
 });
+
 const supabase = useSupabaseClient();
 
 const page = ref(1);
@@ -248,6 +251,7 @@ const columns: TableColumn<Resident>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
+      if (!isTreasurer.value) return;
       return h(
         "div",
         { class: "text-right" },
@@ -473,6 +477,13 @@ const saveHouseNumbers = async () => {
 
   console.log("Simpan nomor rumah selesai");
   showHouseNumber.value = false;
-  await refresh(); // refresh data utama
+  await refresh(); // refresh data utam
 };
+
+const roleName = ref<string | null>(null);
+onMounted(async () => {
+  roleName.value = await getRoleName();
+});
+
+const isTreasurer = computed(() => roleName.value === "treasurer");
 </script>
