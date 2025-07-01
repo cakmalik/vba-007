@@ -47,33 +47,7 @@
           @click="filterType = 'out'"
         />
       </UButtonGroup>
-      <!-- <div class="flex gap-2 mb-4"> -->
-      <!--   <UButton -->
-      <!--     color="gray" -->
-      <!--     variant="soft" -->
-      <!--     :active="filterType === 'all'" -->
-      <!--     @click="filterType = 'all'" -->
-      <!--   > -->
-      <!--     Semua -->
-      <!--   </UButton> -->
-      <!--   <UButton -->
-      <!--     color="green" -->
-      <!--     variant="soft" -->
-      <!--     :active="filterType === 'in'" -->
-      <!--     @click="filterType = 'in'" -->
-      <!--   > -->
-      <!--     Masuk -->
-      <!--   </UButton> -->
-      <!--   <UButton -->
-      <!--     color="red" -->
-      <!--     variant="soft" -->
-      <!--     :active="filterType === 'out'" -->
-      <!--     @click="filterType = 'out'" -->
-      <!--   > -->
-      <!--     Keluar -->
-      <!--   </UButton> -->
-      <!-- </div> -->
-      <!-- Tabel Kas -->
+
       <UTable
         :data="filteredCashflow"
         :columns="columns"
@@ -428,5 +402,9 @@ const isTreasurer = computed(() => roleName.value === "treasurer");
 onMounted(async () => {
   await nextTick();
   roleName.value = await getRoleName();
+});
+
+watch(filterType, () => {
+  page.value = 1;
 });
 </script>
