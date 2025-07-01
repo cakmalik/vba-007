@@ -29,7 +29,7 @@
               class="flex flex-col items-center text-gray-600 dark:text-gray-300 hover:text-primary-600"
               :class="{
                 'text-primary-600 dark:text-primary-600 font-semibold':
-                  $route.path === '/resident/index',
+                  $route.path === '/resident',
               }"
             >
               <UIcon name="i-lucide-users" class="size-5" />

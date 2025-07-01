@@ -1,10 +1,10 @@
 <template>
-  <NuxtLayout>
+  <NuxtLayout :name="isTreasurer ? 'default' : 'public'">
     <div class="relative">
       <div class="flex px-4 py-3.5 border-b border-accented">
         <UInput
           v-model="globalFilter"
-          class="max-w-sm"
+          class="min-w-full"
           placeholder="Golek tonggo here..."
         />
       </div>
