@@ -1,6 +1,7 @@
 <template>
   <UApp>
     <VitePwaManifest />
+    <InstallPrompt />
     <NuxtPage />
   </UApp>
 </template>
