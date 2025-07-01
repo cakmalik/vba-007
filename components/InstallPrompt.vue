@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="canInstall"
-    class="fixed bottom-4 left-4 right-4 sm:right-auto sm:w-auto z-50"
+    class="fixed bottom-20 left-4 right-4 sm:right-auto sm:w-auto z-50"
   >
     <div
       class="bg-white border border-gray-200 rounded-lg shadow-lg p-4 flex items-center justify-between gap-4"
