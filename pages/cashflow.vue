@@ -26,13 +26,66 @@
           </p>
         </div>
       </div>
+
+      <UButtonGroup orientation="horizontal" class="mb-4">
+        <UButton
+          :color="filterType === 'all' ? 'gray' : 'neutral'"
+          variant="soft"
+          label="Semua"
+          @click="filterType = 'all'"
+        />
+        <UButton
+          :color="filterType === 'in' ? 'green' : 'neutral'"
+          variant="soft"
+          label="Masuk"
+          @click="filterType = 'in'"
+        />
+        <UButton
+          :color="filterType === 'out' ? 'red' : 'neutral'"
+          variant="soft"
+          label="Keluar"
+          @click="filterType = 'out'"
+        />
+      </UButtonGroup>
+      <!-- <div class="flex gap-2 mb-4"> -->
+      <!--   <UButton -->
+      <!--     color="gray" -->
+      <!--     variant="soft" -->
+      <!--     :active="filterType === 'all'" -->
+      <!--     @click="filterType = 'all'" -->
+      <!--   > -->
+      <!--     Semua -->
+      <!--   </UButton> -->
+      <!--   <UButton -->
+      <!--     color="green" -->
+      <!--     variant="soft" -->
+      <!--     :active="filterType === 'in'" -->
+      <!--     @click="filterType = 'in'" -->
+      <!--   > -->
+      <!--     Masuk -->
+      <!--   </UButton> -->
+      <!--   <UButton -->
+      <!--     color="red" -->
+      <!--     variant="soft" -->
+      <!--     :active="filterType === 'out'" -->
+      <!--     @click="filterType = 'out'" -->
+      <!--   > -->
+      <!--     Keluar -->
+      <!--   </UButton> -->
+      <!-- </div> -->
       <!-- Tabel Kas -->
       <UTable
-        :data="cashflowData"
+        :data="filteredCashflow"
         :columns="columns"
         :loading="pending"
         loading-color="primary"
       />
+      <!-- <UTable -->
+      <!--   :data="cashflowData" -->
+      <!--   :columns="columns" -->
+      <!--   :loading="pending" -->
+      <!--   loading-color="primary" -->
+      <!-- /> -->
 
       <div class="flex items-center justify-between mt-4">
         <UButton
@@ -142,6 +195,15 @@ const to = computed(() => from.value + pageSize - 1);
 const nextPage = () => page.value++;
 const prevPage = () => page.value--;
 
+const filterType = ref<"all" | "in" | "out">("all");
+
+const filteredCashflow = computed(() => {
+  if (filterType.value === "all") return cashflowData.value ?? [];
+  return (
+    cashflowData.value?.filter((item) => item.type === filterType.value) ?? []
+  );
+});
+
 // Ambil data kas (paginated)
 const {
   data: cashflowData,
@@ -212,21 +274,6 @@ type Cashflow = {
 
 const columns: TableColumn<Cashflow>[] = [
   {
-    accessorKey: "date",
-    header: "Tanggal",
-    cell: ({ row }) => formatDate(new Date(row.original.date), "dd/MM/yyyy"),
-  },
-  {
-    accessorKey: "description",
-    header: "Keterangan",
-    cell: ({ row }) => row.getValue("description"),
-  },
-  {
-    accessorKey: "amount",
-    header: "Jumlah",
-    cell: ({ row }) => formatCurrency(row.getValue("amount")),
-  },
-  {
     accessorKey: "type",
     header: "Tipe",
     cell: ({ row }) => {
@@ -239,6 +286,22 @@ const columns: TableColumn<Cashflow>[] = [
         row.getValue("type"),
       );
     },
+  },
+  {
+    accessorKey: "description",
+    header: "Keterangan",
+    cell: ({ row }) => row.getValue("description"),
+  },
+  {
+    accessorKey: "amount",
+    header: "Jumlah",
+    cell: ({ row }) => formatCurrency(row.getValue("amount")),
+  },
+
+  {
+    accessorKey: "date",
+    header: "Tanggal",
+    cell: ({ row }) => formatDate(new Date(row.original.date), "dd/MM/yyyy"),
   },
   {
     id: "actions",
