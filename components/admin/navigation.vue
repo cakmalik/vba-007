@@ -77,7 +77,7 @@ const items = ref<NavigationMenuItem[][]>([
   [
     {
       icon: "i-lucide-house",
-      to: "/dashboard",
+      to: "/dashboard-public",
       active: false,
     },
     {

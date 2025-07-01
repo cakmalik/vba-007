@@ -89,12 +89,53 @@
       size="2xl"
       color="info"
       variant="solid"
-      class="fixed bottom-6 right-6 rounded-full px-3 py-3"
+      class="fixed bottom-6 right-6 rounded-full px-4 py-4"
     />
+    <!-- <UDrawer -->
+    <!--   v-model:open="open" -->
+    <!--   :dismissible="false" -->
+    <!--   :handle="false" -->
+    <!--   :ui="{ header: 'flex items-center justify-between' }" -->
+    <!-- > -->
+    <!--   <UButton -->
+    <!--     label="Open" -->
+    <!--     color="neutral" -->
+    <!--     variant="subtle" -->
+    <!--     trailing-icon="i-lucide-chevron-up" -->
+    <!--   /> -->
+    <!---->
+    <!--   <template #header> -->
+    <!--     <h2 class="text-highlighted font-semibold">Drawer non-dismissible</h2> -->
+    <!---->
+    <!--     <UButton -->
+    <!--       color="neutral" -->
+    <!--       variant="ghost" -->
+    <!--       icon="i-lucide-x" -->
+    <!--       @click="open = false" -->
+    <!--     /> -->
+    <!--   </template> -->
+    <!---->
+    <!--   <template #body> -->
+    <!--     <Placeholder class="h-48" /> -->
+    <!--   </template> -->
+    <!-- </UDrawer> -->
 
-    <UDrawer v-model:open="showForm">
-      <template #title>{{ isEdit ? "Edit" : "Tambah" }} Iuran</template>
-      <template #content>
+    <UDrawer
+      v-model:open="showForm"
+      :dismissible="false"
+      :ui="{ header: 'flex items-center justify-between' }"
+    >
+      <template #header>
+        <h2 class="text-highlighted font-semibold"></h2>
+
+        <UButton
+          color="neutral"
+          variant="ghost"
+          icon="i-lucide-x"
+          @click="showForm = false"
+        />
+      </template>
+      <template #body>
         <div class="p-6 flex justify-center">
           <UForm
             :state="form"
@@ -104,8 +145,6 @@
             <USelectMenu
               v-model="form.profile_id"
               :items="profileOptions"
-              option-attribute="label"
-              value-attribute="value"
               label="Profil warga"
               placeholder="Pilih profil"
               class="w-full sm:w-1/2 md:w-1/4"
@@ -114,8 +153,6 @@
             <USelectMenu
               v-model="form.house_number_id"
               :items="houseOptions"
-              option-attribute="label"
-              value-attribute="value"
               label="No Rumah"
               placeholder="Pilih no rumah"
               class="w-full sm:w-1/2 md:w-1/4"

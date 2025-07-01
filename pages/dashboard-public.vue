@@ -1,5 +1,5 @@
 <template>
-  <NuxtLayout name="public">
+  <NuxtLayout :name="isTreasurer ? 'default' : 'public'">
     <div class="p-6 space-y-6 text-gray-900 dark:text-white">
       <!-- Data Warga -->
       <UCard variant="soft">
@@ -57,9 +57,17 @@
 </template>
 
 <script setup lang="ts">
+import { getRoleName } from "@/composables/useRole";
 definePageMeta({
   title: "Dashboard",
 });
+
+const roleName = ref<string | null>(null);
+onMounted(async () => {
+  roleName.value = await getRoleName();
+});
+
+const isTreasurer = computed(() => roleName.value === "treasurer");
 
 const supabase = useSupabaseClient();
 
