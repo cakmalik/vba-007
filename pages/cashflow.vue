@@ -151,7 +151,7 @@ const UDropdownMenu = resolveComponent("UDropdownMenu");
 // Metadata halaman
 definePageMeta({
   title: "Kas",
-  subtitle: "Kelola keluar masuk kas",
+  subtitle: "Riwayat keluar masuk kas",
 });
 
 // Supabase client
