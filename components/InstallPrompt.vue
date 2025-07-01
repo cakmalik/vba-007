@@ -7,7 +7,7 @@
       class="bg-white border border-gray-200 rounded-lg shadow-lg p-4 flex items-center justify-between gap-4"
     >
       <div>
-        <p class="font-semibold">Install Aplikasi?</p>
+        <p class="font-semibold text-gray-800">Install Aplikasi?</p>
         <p class="text-sm text-gray-500">
           Tambahkan ke layar utama untuk akses cepat.
         </p>
