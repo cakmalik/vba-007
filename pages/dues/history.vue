@@ -528,8 +528,8 @@ function editData(id: number) {
 // .eq("id", form.value.profile_id?.value?.house_id);
 function mapFormToPayload(form: any) {
   return {
-    profile_id: form.profile_id?.value?.profile_id ?? form.profile_id,
-    house_number_id: form.profile_id?.value?.house_id ?? form.house_number_id,
+    profile_id: selected_profile_id.value?.value?.profile_id,
+    house_number_id: selected_profile_id.value?.value?.house_id,
     billing_period_id: form.billing_period_id?.value ?? form.billing_period_id,
     payment_method_id: form.payment_method_id?.value ?? form.payment_method_id,
     amount_override: form.amount_override,
@@ -702,7 +702,7 @@ watch(
 
 const getHouseNumbers = async () => {
   const houseId = selected_profile_id.value?.value?.house_id;
-  // console.log("profileIdOk", profileIdOk);
+  // console.log("profileIdOk", houseId);
   const { data: nomerRumah, error } = await supabase
     .from("house_number")
     .select("id, profile_id, name")
