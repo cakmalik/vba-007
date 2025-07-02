@@ -336,7 +336,7 @@ const {
     const term = debouncedSearchName.value.trim().toLowerCase();
     const periodId = selectedPeriod.value?.value ?? selectedPeriod.value;
     const blockId = selectedBlock.value?.value;
-    console.log("term", term);
+    // console.log("term", term);
     console.log("periodId", periodId);
     console.log("blockId baru", blockId);
 
@@ -527,6 +527,9 @@ function editData(id: number) {
 
 // .eq("id", form.value.profile_id?.value?.house_id);
 function mapFormToPayload(form: any) {
+  // console.log("selected_profile_id", selected_profile_id.value);
+  // console.log("billing_period", form.billing_period_id);
+
   return {
     profile_id: selected_profile_id.value?.value?.profile_id,
     house_number_id: selected_profile_id.value?.value?.house_id,
@@ -569,7 +572,7 @@ async function submitForm() {
       date: payload.due_date,
       type: "in",
       amount: payload.amount_override,
-      description: `Pembayaran iuran oleh ${form.value.profile_id?.label ?? form.value.profile_id}`,
+      description: `Pembayaran iuran bulan ${form.value.billing_period_id?.label} oleh ${selected_profile_id.value?.label}`,
       source: "iuran",
       category_id: null, // kalau belum ada kategori bisa diisi null
       recorded_by: payload.profile_id,
