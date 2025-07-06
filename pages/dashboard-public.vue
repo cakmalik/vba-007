@@ -1,5 +1,6 @@
 <template>
   <NuxtLayout :name="isTreasurer ? 'default' : 'public'">
+    <!-- <InstallPrompt v-if="isProd" /> -->
     <div class="p-6 space-y-6 text-gray-900 dark:text-white">
       <!-- Data Warga -->
       <UCard variant="soft">
@@ -61,6 +62,8 @@ import { getRoleName } from "@/composables/useRole";
 definePageMeta({
   title: "Dashboard",
 });
+
+const isProd = import.meta.env.PROD;
 
 const roleName = ref<string | null>(null);
 onMounted(async () => {
