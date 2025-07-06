@@ -25,8 +25,12 @@
         formatCurrency(totalAmount)
       }}</span>
     </div>
+
     <!-- Filter Row -->
-    <div class="flex justify-between flex-wrap items-center mb-4 gap-2">
+    <div
+      v-if="!kodeRumah"
+      class="flex justify-between flex-wrap items-center mb-4 gap-2"
+    >
       <!-- Pencarian Nama -->
 
       <UInput
@@ -233,6 +237,7 @@ import type { AvatarProps } from "@nuxt/ui";
 const kodeRumah = route.query.code;
 
 const UAvatar = resolveComponent("UAvatar");
+const UBadge = resolveComponent("UBadge");
 
 const supabase = useSupabaseClient();
 
@@ -449,12 +454,49 @@ const columns: TableColumn[] = [
     header: "Jumlah",
     cell: ({ row }) => formatCurrency(row.getValue("amount_override")),
   },
+
   {
     accessorKey: "status",
     header: "Status",
-    cell: ({ row }) =>
-      row.getValue("status") === "unpaid" ? "Belum Lunas" : "Lunas",
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string;
+      const color = {
+        paid: "success" as const,
+        unpaid: "error" as const,
+      }[status];
+
+      const label = {
+        paid: "Lunas",
+        unpaid: "Belum Lunas",
+      }[status];
+
+      return h(
+        UBadge,
+        { class: "capitalize", variant: "subtle", color },
+        () => label,
+      );
+    },
   },
+  // {
+  //   accessorKey: "status",
+  //   header: "Status",
+  //   cell: ({ row }) => {
+  //     const color = {
+  //       paid: "success" as const,
+  //       unpaid: "error" as const,
+  //     }[row.getValue("type") as string];
+  //
+  //     return h(UBadge, { class: "capitalize", variant: "subtle", color }, () =>
+  //       row.getValue("status"),
+  //     );
+  //   },
+  // },
+  // {
+  //   accessorKey: "status",
+  //   header: "Status",
+  //   cell: ({ row }) =>
+  //     row.getValue("status") === "unpaid" ? "Belum Lunas" : "Lunas",
+  // },
   {
     accessorKey: "created_at",
     header: "Tanggal",
