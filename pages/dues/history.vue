@@ -221,6 +221,7 @@ definePageMeta({
   layout: "default",
 });
 
+const route = useRoute();
 import { h, onMounted, ref, computed, watch } from "vue";
 import { useDateFormat } from "@vueuse/core";
 import type { TableColumn } from "@nuxt/ui";
@@ -228,6 +229,8 @@ import { UButton } from "#components";
 import { getRoleName } from "@/composables/useRole";
 import { useDebounce } from "@vueuse/core";
 import type { AvatarProps } from "@nuxt/ui";
+
+const kodeRumah = route.query.code;
 
 const UAvatar = resolveComponent("UAvatar");
 
@@ -331,7 +334,7 @@ const {
   pending,
 } = await useAsyncData(
   () =>
-    `profile-dues-page-${page.value}-${debouncedSearchName.value}-${selectedPeriod.value}-${selectedBlock.value}`,
+    `profile-dues-page-${page.value}-${debouncedSearchName.value}-${selectedPeriod.value}-${selectedBlock.value}-${kodeRumah}`,
   async () => {
     const term = debouncedSearchName.value.trim().toLowerCase();
     const periodId = selectedPeriod.value?.value ?? selectedPeriod.value;
@@ -346,7 +349,7 @@ const {
         `
         *,
         profiles!profile_dues_profile_id_fkey(nickname, full_name, image_url),
-        house_number:house_number_id!inner(name, housing_block_id),
+        house_number:house_number_id!inner(name, housing_block_id, code),
         payment_methods!profile_dues_payment_method_id_fkey(name),
         billing_periods!fk_period(month, year)
         `,
@@ -354,13 +357,17 @@ const {
       .range(from.value, to.value)
       .order("due_date", { ascending: false });
 
-    // Filter periode
-    if (periodId) {
-      query = query.eq("billing_period_id", periodId);
-    }
+    if (kodeRumah != null && kodeRumah != undefined) {
+      query = query.eq("house_number.code", kodeRumah);
+    } else {
+      // Filter periode
+      if (periodId) {
+        query = query.eq("billing_period_id", periodId);
+      }
 
-    if (blockId !== null && blockId !== "all") {
-      query = query.eq("house_number.housing_block_id", blockId);
+      if (blockId !== null && blockId !== "all") {
+        query = query.eq("house_number.housing_block_id", blockId);
+      }
     }
 
     const { data, error } = await query;
@@ -593,6 +600,7 @@ async function submitForm() {
   await refresh();
   showForm.value = false;
 }
+
 // async function submitForm() {
 //   // const { id, ...payload } = form.value;
 //   const { id } = form.value;
