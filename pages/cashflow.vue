@@ -27,26 +27,37 @@
         </div>
       </div>
 
-      <UButtonGroup orientation="horizontal" class="mb-4">
-        <UButton
-          :color="filterType === 'all' ? 'gray' : 'neutral'"
-          variant="soft"
-          label="Semua"
-          @click="filterType = 'all'"
+      <div class="flex justify-between flex-wrap items-center mb-4 gap-2">
+        <UButtonGroup orientation="horizontal" class="mb-4">
+          <UButton
+            :color="filterType === 'all' ? 'gray' : 'neutral'"
+            variant="soft"
+            label="Semua"
+            @click="filterType = 'all'"
+          />
+          <UButton
+            :color="filterType === 'in' ? 'green' : 'neutral'"
+            variant="soft"
+            label="Masuk"
+            @click="filterType = 'in'"
+          />
+          <UButton
+            :color="filterType === 'out' ? 'red' : 'neutral'"
+            variant="soft"
+            label="Keluar"
+            @click="filterType = 'out'"
+          />
+        </UButtonGroup>
+
+        <USelectMenu
+          v-model="selectedPeriod"
+          :items="periodOptions"
+          option-attribute="label"
+          value-attribute="value"
+          placeholder="Filter Periode"
+          class="w-full sm:w-1/3 md:w-1/4"
         />
-        <UButton
-          :color="filterType === 'in' ? 'green' : 'neutral'"
-          variant="soft"
-          label="Masuk"
-          @click="filterType = 'in'"
-        />
-        <UButton
-          :color="filterType === 'out' ? 'red' : 'neutral'"
-          variant="soft"
-          label="Keluar"
-          @click="filterType = 'out'"
-        />
-      </UButtonGroup>
+      </div>
 
       <UTable
         :data="filteredCashflow"
@@ -147,6 +158,10 @@ const UAvatar = resolveComponent("UAvatar");
 const UButton = resolveComponent("UButton");
 const UBadge = resolveComponent("UBadge");
 const UDropdownMenu = resolveComponent("UDropdownMenu");
+const periodOptions = ref([]);
+const selectedPeriod = ref<{ label: string; value: number | null } | null>(
+  null,
+);
 
 // Metadata halaman
 definePageMeta({
@@ -184,7 +199,10 @@ const {
   refresh,
   pending,
 } = await useAsyncData(
-  () => `cashflow-page-${page.value}-${filterType.value}`,
+  () =>
+    `cashflow-page-${page.value}-${filterType.value}-${
+      selectedPeriod.value?.value ?? "all"
+    }`,
   async () => {
     let query = supabase
       .from("cash_flows")
@@ -196,20 +214,49 @@ const {
       query = query.eq("type", filterType.value);
     }
 
-    const { data, error } = await query;
+    if (selectedPeriod.value?.value) {
+      const selected = periodOptions.value.find(
+        (p) => p.value === selectedPeriod.value?.value,
+      );
 
+      if (selected?.start_date && selected?.end_date) {
+        query = query
+          .gte("date", selected.start_date)
+          .lte("date", selected.end_date);
+      }
+    }
+
+    const { data, error } = await query;
     if (error) throw error;
+
     hasNextPage.value = data.length === pageSize;
     return data;
   },
 );
 
-const { data: summary, pending: loadingSummary } = await useAsyncData(
-  "cashflow-summary",
+const {
+  data: summary,
+  pending: loadingSummary,
+  refresh: refreshSummary,
+} = await useAsyncData(
+  () => `cashflow-summary-${selectedPeriod.value?.value ?? "all"}`,
   async () => {
-    const { data, error } = await supabase
-      .from("cash_flows")
-      .select("type, amount");
+    let query = supabase.from("cash_flows").select("type, amount");
+
+    // Filter berdasarkan periode (jika dipilih)
+    if (selectedPeriod.value?.value) {
+      const selected = periodOptions.value.find(
+        (p) => p.value === selectedPeriod.value?.value,
+      );
+
+      if (selected?.start_date && selected?.end_date) {
+        query = query
+          .gte("date", selected.start_date)
+          .lte("date", selected.end_date);
+      }
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
 
@@ -220,21 +267,22 @@ const { data: summary, pending: loadingSummary } = await useAsyncData(
       else if (item.type === "out") result.out += item.amount;
     }
 
-    // Kembalikan array summary mirip hasil query agregat
     return [
       { type: "in", total: result.in },
       { type: "out", total: result.out },
     ];
   },
   {
-    server: false, // Supabase hanya jalan di client
-    lazy: true, // Eksekusi setelah halaman siap
+    server: false,
+    lazy: true,
   },
 );
-// Debug summary jika berubah
-// watchEffect(() => {
-//   console.log('Cashflow summary updated:', summary.value)
-// })
+
+watch(selectedPeriod, async () => {
+  page.value = 1;
+  await refresh();
+  await refreshSummary();
+});
 
 // Hitung total kas masuk dan keluar
 const kasMasuk = computed(
@@ -405,9 +453,26 @@ const submitForm = async () => {
 
 const roleName = ref<string | null>(null);
 const isTreasurer = computed(() => roleName.value === "treasurer");
+
 onMounted(async () => {
   await nextTick();
   roleName.value = await getRoleName();
+
+  const { data: periods } = await supabase
+    .from("billing_periods")
+    .select("id, month, year, start_date, end_date")
+    .order("id", { ascending: false });
+
+  const mapped =
+    periods?.map((p) => ({
+      label: `${namaBulanDariAngka(p.month)} ${p.year}`,
+      value: p.id,
+      start_date: p.start_date,
+      end_date: p.end_date,
+    })) ?? [];
+
+  periodOptions.value = [{ label: "Semua", value: null }, ...mapped];
+  selectedPeriod.value = { label: "Semua", value: null };
 });
 
 watch(filterType, () => {
