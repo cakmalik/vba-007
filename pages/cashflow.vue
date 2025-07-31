@@ -184,13 +184,19 @@ const {
   refresh,
   pending,
 } = await useAsyncData(
-  () => `cashflow-page-${page.value}`,
+  () => `cashflow-page-${page.value}-${filterType.value}`,
   async () => {
-    const { data, error } = await supabase
+    let query = supabase
       .from("cash_flows")
       .select("*")
       .range(from.value, to.value)
       .order("created_at", { ascending: false });
+
+    if (filterType.value !== "all") {
+      query = query.eq("type", filterType.value);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
     hasNextPage.value = data.length === pageSize;
