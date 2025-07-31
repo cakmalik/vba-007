@@ -284,7 +284,7 @@ watch(selectedPeriod, async () => {
   await refreshSummary();
 });
 
-// Hitung total kas masuk dan keluar
+// Hitung total kas masuk dan kelua
 const kasMasuk = computed(
   () => summary.value?.find((i) => i.type === "in")?.total ?? 0,
 );
