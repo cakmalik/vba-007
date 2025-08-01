@@ -871,7 +871,7 @@ Terima kasih kepada Bapak/Ibu ${data.profiles?.full_name} yang telah melakukan p
 Kontribusi ini sangat membantu dalam menjaga kelancaran kegiatan dan operasional lingkungan RT kita tercinta.
 
 📄 Berikut adalah tautan invoice sebagai bukti pembayaran:
-👉 ${data.invoice_url}
+👉 ${invoiceUrl}
 
 Semoga kebaikan Bapak/Ibu mendapatkan balasan yang lebih baik dari Allah SWT, serta diberikan kelapangan rezeki dan keberkahan.
 
