@@ -867,7 +867,7 @@ async function sendInvoiceViaWa(data: any) {
     "message",
     `Assalamu’alaikum Wr. Wb.
 
-Terima kasih kepada Bapak/Ibu ${data.profiles?.full_name} yang telah melakukan pembayaran iuran warga untuk periode ${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}.
+Terima kasih kepada Bapak/Ibu *${data.profiles?.nickname}* yang telah melakukan pembayaran iuran warga untuk periode ${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}.
 Kontribusi ini sangat membantu dalam menjaga kelancaran kegiatan dan operasional lingkungan RT kita tercinta.
 
 📄 Berikut adalah tautan invoice sebagai bukti pembayaran:
