@@ -856,9 +856,26 @@ async function sendInvoiceViaWa(data: any) {
 
   const payload = new FormData();
   payload.append("target", phoneNumber);
+  // payload.append(
+  //   "message",
+  //   `Halo ${data.profiles?.full_name}, berikut adalah bukti iuran Anda bulan ${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}`,
+  // );
+
   payload.append(
     "message",
-    `Halo ${data.profiles?.full_name}, berikut adalah bukti iuran Anda bulan ${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}`,
+    `Assalamu’alaikum Wr. Wb.
+
+Terima kasih kepada Bapak/Ibu ${data.profiles?.full_name} yang telah melakukan pembayaran iuran warga untuk periode ${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}.
+Kontribusi ini sangat membantu dalam menjaga kelancaran kegiatan dan operasional lingkungan RT kita tercinta.
+
+📄 Berikut adalah tautan invoice sebagai bukti pembayaran:
+👉 ${data.invoice_url}
+
+Semoga kebaikan Bapak/Ibu mendapatkan balasan yang lebih baik dari Allah SWT, serta diberikan kelapangan rezeki dan keberkahan.
+
+Wassalamu’alaikum Wr. Wb.
+Hormat kami,
+Pengurus RT 007`,
   );
   payload.append("url", invoiceUrl);
   payload.append("filename", `invoice-${data.code}.pdf`);
