@@ -120,6 +120,8 @@
         </div>
       </div>
     </div>
+
+    i<NuxtLink class="text-blue-600" to="/">Lihat Laporan Keuangan</NuxtLink>
   </div>
 </template>
 
