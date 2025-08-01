@@ -877,7 +877,10 @@ Semoga kebaikan Bapak/Ibu mendapatkan balasan yang lebih baik dari Allah SWT, se
 
 Wassalamu’alaikum Wr. Wb.
 Hormat kami,
-Pengurus RT 007`,
+Pengurus RT 007.
+
+#Pesan ini otomatis, gausah bales gapapa.
+`,
   );
   payload.append("url", invoiceUrl);
   payload.append("filename", `invoice-${data.code}.pdf`);
