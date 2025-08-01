@@ -1,5 +1,8 @@
 <template>
-  <div class="bg-gray-100 min-h-screen p-4 flex flex-col items-center">
+  <div
+    v-if="form"
+    class="bg-gray-100 min-h-screen p-4 flex flex-col items-center"
+  >
     <!-- Tombol simpan -->
     <div class="print:hidden self-end mb-4 z-10">
       <!-- <button -->
@@ -121,28 +124,18 @@
 </template>
 
 <script setup>
-import html2canvas from "html2canvas";
 import { ref, computed, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import { createClient } from "@supabase/supabase-js";
 
-const form = ref({
-  namaWarga: "Bpk Bayu",
-  noRumah: "P-19",
-  tanggalBayar: "",
-  bulanBayar: "",
-  nominalBayar: 50000,
-  metodeBayar: "Cash / Tunai",
-  diterimaOleh: "Ketua RT - Bpk. Supriyono",
-});
+const supabase = useSupabaseClient();
+const route = useRoute();
+const receiptCode = route.params.code;
 
-const metodeOptions = ["Cash / Tunai", "Transfer Bank", "QRIS", "Lainnya"];
-
-onMounted(() => {
-  const today = new Date();
-  form.value.tanggalBayar = today.toISOString().substring(0, 10);
-  form.value.bulanBayar = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
-});
+const form = ref(null);
 
 const formattedTanggal = computed(() => {
+  if (!form.value?.tanggalBayar) return "";
   const d = new Date(form.value.tanggalBayar);
   return d.toLocaleDateString("id-ID", {
     year: "numeric",
@@ -152,6 +145,7 @@ const formattedTanggal = computed(() => {
 });
 
 const formattedBulan = computed(() => {
+  if (!form.value?.bulanBayar) return "";
   const d = new Date(form.value.bulanBayar + "-01");
   return d.toLocaleDateString("id-ID", { year: "numeric", month: "long" });
 });
@@ -164,35 +158,58 @@ function formatRupiah(value) {
   }).format(value);
 }
 
-function updateReceipt() {
-  // semua data sudah reactive via v-model
-}
+onMounted(async () => {
+  await fetchReceiptData();
+});
 
-function downloadImage() {
-  const el = document.getElementById("wrapper");
-  let nama = form.value.namaWarga
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9\-]/g, "");
-  const fileName = `bukti-iuran-${nama}.png`;
+async function fetchReceiptData() {
+  console.log("receiptCode", receiptCode);
+  if (!receiptCode) return;
 
-  html2canvas(el, {
-    useCORS: true,
-    allowTaint: false,
-    backgroundColor: null,
-    imageTimeout: 0,
-    backgroundColor: "#ffffff",
-    scale: 2,
-    useCORS: true,
-  }).then((canvas) => {
-    const link = document.createElement("a");
-    link.download = fileName;
-    link.href = canvas.toDataURL();
-    link.click();
-  });
+  console.log("running");
+
+  const { data, error } = await supabase
+    .from("profile_dues")
+    .select(
+      `
+    code,
+    amount_override,
+    created_at,
+    billing_periods:billing_period_id (
+      month,
+      year
+    ),
+    profiles:profile_id (
+      nickname,
+      full_name
+    ),
+    house_number:house_number_id (
+      name
+    ),
+payment_methods:payment_method_id (
+  name
+)
+  `,
+    )
+    .eq("code", receiptCode)
+    .single();
+
+  if (error) {
+    console.error("Gagal ambil data:", error);
+    return;
+  }
+
+  form.value = {
+    namaWarga: data.profiles.nickname,
+    noRumah: data.house_number.name,
+    tanggalBayar: data.created_at,
+    bulanBayar: `${data.billing_periods.year}-${String(data.billing_periods.month).padStart(2, "0")}`,
+    nominalBayar: data.amount_override,
+    metodeBayar: data.payment_methods.name,
+    diterimaOleh: data.user?.name || "Petugas RT",
+  };
 }
 </script>
-
 <style scoped>
 .watermark {
   background-image: url("/watermark.png");
