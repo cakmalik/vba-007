@@ -867,21 +867,25 @@ async function sendInvoiceViaWa(data: any) {
     "message",
     `Assalamu’alaikum Wr. Wb.
 
-Terima kasih kepada Bapak/Ibu *${data.profiles?.nickname}* yang telah melakukan pembayaran iuran warga untuk periode ${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}.
-Kontribusi ini sangat membantu dalam menjaga kelancaran kegiatan dan operasional lingkungan RT kita tercinta.
+Terima kasih atas pembayaran iuran warga yang telah dilakukan. Berikut detail pembayarannya:
 
-📄 Berikut adalah tautan invoice sebagai bukti pembayaran:
-👉 ${invoiceUrl}
+👤 *Nama*: *${data.profiles?.nickname}*  
+🏘️ *Blok*: ${data.house_number?.name ?? "-"}  
+📅 *Periode*: ${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}  
+💰 *Nominal*: Rp ${Number(data.nominal).toLocaleString("id-ID")}  
+📄 *Invoice*: ${invoiceUrl}
+
+Kontribusi ini sangat membantu dalam menjaga kelancaran kegiatan dan operasional lingkungan RT kita tercinta.
 
 Semoga kebaikan Bapak/Ibu mendapatkan balasan yang lebih baik dari Allah SWT, serta diberikan kelapangan rezeki dan keberkahan.
 
-Wassalamu’alaikum Wr. Wb.
-Hormat kami,
+Wassalamu’alaikum Wr. Wb.  
+Hormat kami,  
 Pengurus RT 007.
 
-#Pesan ini otomatis, gausah bales gapapa.
-`,
+#Pesan ini otomatis, gausah bales gapapa.`,
   );
+
   payload.append("url", invoiceUrl);
   payload.append("filename", `invoice-${data.code}.pdf`);
   payload.append("schedule", "0");
