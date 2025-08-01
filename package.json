@@ -21,6 +21,8 @@
     "@nuxtjs/supabase": "^1.5.2",
     "@unhead/vue": "^2.0.10",
     "@vite-pwa/nuxt": "^1.0.4",
+    "axios": "^1.11.0",
+    "dotenv": "^17.2.1",
     "eslint": "^9.29.0",
     "html2canvas": "^1.4.1",
     "ipx": "^3.0.3",
