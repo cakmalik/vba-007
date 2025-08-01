@@ -847,7 +847,9 @@ if (import.meta.server) {
 
 async function sendInvoiceViaWa(data: any) {
   const phoneNumber = parsePhoneNumber(data?.profiles?.phone_number ?? "");
-  const invoiceUrl = `${window.location.origin}/invoice/${data.code}`;
+  const invoiceUrl = `${window.location.origin}/invoice/${data?.code}`;
+
+  console.log("invoiceUrl", invoiceUrl);
 
   if (!phoneNumber) {
     alert("Nomor telepon tidak tersedia");
