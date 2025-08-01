@@ -499,15 +499,15 @@ const columns: TableColumn[] = [
   //   cell: ({ row }) =>
   //     row.getValue("status") === "unpaid" ? "Belum Lunas" : "Lunas",
   // },
-  {
-    accessorKey: "code",
-    header: "Kode",
-    cell: ({ row }) => {
-      return h(UBadge, { variant: "subtle", color: "info" }, () =>
-        row.getValue("code"),
-      );
-    },
-  },
+  // {
+  //   accessorKey: "code",
+  //   header: "Kode",
+  //   cell: ({ row }) => {
+  //     return h(UBadge, { variant: "subtle", color: "info" }, () =>
+  //       row.getValue("code"),
+  //     );
+  //   },
+  // },
 
   {
     accessorKey: "created_at",
@@ -538,6 +538,16 @@ const columns: TableColumn[] = [
           h(
             UButton,
             {
+              icon: "i-lucide-send",
+              variant: "ghost",
+              color: "primary",
+              onClick: () => sendInvoiceViaWa(row.original),
+            },
+            () => "Kirim WA",
+          ),
+          h(
+            UButton,
+            {
               icon: "i-lucide-file-text",
               variant: "ghost",
               color: "primary",
@@ -546,16 +556,6 @@ const columns: TableColumn[] = [
               },
             },
             () => "Bukti",
-          ),
-          h(
-            UButton,
-            {
-              icon: "i-lucide-send",
-              variant: "ghost",
-              color: "green",
-              onClick: () => sendInvoiceViaWa(row.original),
-            },
-            () => "Kirim WA",
           ),
         );
       }
