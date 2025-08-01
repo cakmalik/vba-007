@@ -41,7 +41,6 @@ onMounted(async () => {
         user.value.email === "hasinilmalik@gmail.com"
           ? "treasurer"
           : "resident",
-      house_number: "-",
       phone_number: "-",
     });
 
