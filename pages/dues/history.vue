@@ -226,6 +226,8 @@ definePageMeta({
 });
 
 const route = useRoute();
+const router = useRouter();
+
 import { h, onMounted, ref, computed, watch } from "vue";
 import { useDateFormat } from "@vueuse/core";
 import type { TableColumn } from "@nuxt/ui";
@@ -498,25 +500,57 @@ const columns: TableColumn[] = [
   //     row.getValue("status") === "unpaid" ? "Belum Lunas" : "Lunas",
   // },
   {
+    accessorKey: "code",
+    header: "Kode",
+    cell: ({ row }) => {
+      return h(UBadge, { variant: "subtle", color: "info" }, () =>
+        row.getValue("code"),
+      );
+    },
+  },
+
+  {
     accessorKey: "created_at",
     header: "Tanggal",
     cell: ({ row }) =>
       useDateFormat(row.getValue("created_at"), "DD/MM/YYYY").value,
   },
+
   {
     id: "actions",
     cell: ({ row }) => {
       if (!isTreasurer.value) return null;
 
-      return h(
-        UButton,
-        {
-          icon: "i-lucide-edit",
-          variant: "ghost",
-          onClick: () => editData(row.original.id),
-        },
-        () => "Edit",
-      );
+      const buttons = [
+        h(
+          UButton,
+          {
+            icon: "i-lucide-edit",
+            variant: "ghost",
+            onClick: () => editData(row.original.id),
+          },
+          () => "Edit",
+        ),
+      ];
+
+      if (row.original.code) {
+        buttons.push(
+          h(
+            UButton,
+            {
+              icon: "i-lucide-file-text",
+              variant: "ghost",
+              color: "primary",
+              onClick: () => {
+                router.push(`/invoice/${row.original.code}`);
+              },
+            },
+            () => "Bukti",
+          ),
+        );
+      }
+
+      return h("div", { class: "flex gap-2" }, buttons);
     },
   },
 ];
@@ -593,7 +627,10 @@ function mapFormToPayload(form: any) {
 async function submitForm() {
   const { id } = form.value;
   const payload = mapFormToPayload(form.value);
-  console.log("payload", payload);
+  // console.log("payload", payload);
+  if (!isEdit.value) {
+    payload.code = generateRandomCode();
+  }
 
   let res;
 
@@ -774,6 +811,13 @@ const getHouseNumbers = async () => {
     form.value.house_number_id = houseOptions.value[0];
   }
 };
+
+function generateRandomCode(length = 5) {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  return Array.from({ length }, () =>
+    chars.charAt(Math.floor(Math.random() * chars.length)),
+  ).join("");
+}
 
 // watch(
 //   () => form.value.selectedBlock,
