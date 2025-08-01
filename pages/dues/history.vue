@@ -355,7 +355,7 @@ const {
       .select(
         `
         *,
-        profiles!profile_dues_profile_id_fkey(nickname, full_name, image_url),
+        profiles!profile_dues_profile_id_fkey(nickname, full_name, image_url,phone_number),
         house_number:house_number_id!inner(name, housing_block_id, code),
         payment_methods!profile_dues_payment_method_id_fkey(name),
         billing_periods!fk_period(month, year)
@@ -546,6 +546,16 @@ const columns: TableColumn[] = [
               },
             },
             () => "Bukti",
+          ),
+          h(
+            UButton,
+            {
+              icon: "i-lucide-send",
+              variant: "ghost",
+              color: "green",
+              onClick: () => sendInvoiceViaWa(row.original),
+            },
+            () => "Kirim WA",
           ),
         );
       }
@@ -825,4 +835,74 @@ function generateRandomCode(length = 5) {
 //     await get();
 //   },
 // );
+//
+
+const config = useRuntimeConfig();
+
+// console.log("Runtime config:", config);
+if (import.meta.server) {
+  // console.log("API secret:", config.fonnte);
+  const tokenwa = config.fonnte;
+}
+
+async function sendInvoiceViaWa(data: any) {
+  const phoneNumber = parsePhoneNumber(data?.profiles?.phone_number ?? "");
+  const invoiceUrl = `${window.location.origin}/invoice/${data.code}`;
+
+  if (!phoneNumber) {
+    alert("Nomor telepon tidak tersedia");
+    return;
+  }
+
+  const payload = new FormData();
+  payload.append("target", phoneNumber);
+  payload.append(
+    "message",
+    `Halo ${data.profiles?.full_name}, berikut adalah bukti iuran Anda bulan ${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}`,
+  );
+  payload.append("url", invoiceUrl);
+  payload.append("filename", `invoice-${data.code}.pdf`);
+  payload.append("schedule", "0");
+  payload.append("delay", "2");
+  payload.append("countryCode", "62");
+
+  try {
+    const response = await fetch("https://api.fonnte.com/send", {
+      method: "POST",
+      headers: {
+        Authorization: "4JcyBTUcM3h1M86TzF3Q",
+        // Authorization: config.fonnte,
+      },
+      body: payload,
+    });
+
+    const res = await response.json();
+    console.log("Res WA:", res);
+    // console.log("token", config.fonnte);
+
+    if (res.status) {
+      alert("Invoice berhasil dikirim via WhatsApp");
+    } else {
+      alert("Gagal mengirim WA: " + (res.reason || "Unknown error"));
+    }
+  } catch (error) {
+    console.error("WA error:", error);
+    alert("Terjadi kesalahan saat mengirim pesan.");
+  }
+}
+
+function parsePhoneNumber(raw: string): string {
+  let phone = raw.replace(/\D/g, ""); // hapus semua non-digit
+
+  if (phone.startsWith("0")) {
+    phone = "62" + phone.slice(1);
+  } else if (phone.startsWith("+")) {
+    phone = phone.replace(/^\+/, "");
+  } else if (!phone.startsWith("62")) {
+    // jika tidak pakai awalan 0 atau 62, anggap lokal
+    phone = "62" + phone;
+  }
+
+  return phone;
+}
 </script>
