@@ -174,22 +174,38 @@ const columns: TableColumn<BillingPeriod>[] = [
     cell: ({ row }) =>
       useDateFormat(row.getValue("end_date"), "DD/MM/YYYY").value,
   },
+
   {
     id: "actions",
     cell: ({ row }) => {
       return h(
         "div",
-        { class: "text-right" },
-        h(
-          UButton,
-          {
-            icon: "i-lucide-edit",
-            color: "primary",
-            variant: "ghost",
-            onClick: () => editData(row.original.id),
-          },
-          () => "Edit",
-        ),
+        { class: "text-right flex gap-2 justify-end" }, // Tambahkan gap & flex jika butuh spacing antar tombol
+        [
+          h(
+            UButton,
+            {
+              icon: "i-lucide-edit",
+              color: "primary",
+              variant: "ghost",
+              onClick: () => editData(row.original.id),
+            },
+            () => "Edit",
+          ),
+          h(
+            UButton,
+            {
+              icon: "i-lucide-file-text",
+              color: "primary",
+              variant: "ghost",
+              onClick: () => {
+                console.log("row.original:", row.original);
+                generateTagihan(row.original.id);
+              },
+            },
+            () => "Generate Tagihan Massal",
+          ),
+        ],
       );
     },
   },
@@ -265,5 +281,22 @@ const submitForm = async () => {
 
   await refresh();
   showForm.value = false;
+};
+
+const generateTagihan = async (billing_period_id: number) => {
+  try {
+    const res = await $fetch("/api/generate-tagihan", {
+      method: "POST",
+      body: {
+        billing_period_id,
+      },
+    });
+
+    // tampilkan notifikasi atau reload data
+    console.log(res.message);
+    alert(res.message);
+  } catch (error) {
+    console.error("Gagal generate tagihan", error);
+  }
 };
 </script>

@@ -20,9 +20,18 @@
       v-if="isTreasurer"
       class="mb-4 bg-primary-100 dark:bg-primary-600 text-primary-700 dark:text-primary-200 px-6 py-4 rounded-lg shadow-sm flex items-center justify-between"
     >
-      <span class="text-base font-medium">Total </span>
+      <span class="text-base font-medium">Total Lunas</span>
       <span class="text-2xl font-bold tracking-wide">{{
         formatCurrency(totalAmount)
+      }}</span>
+    </div>
+    <div
+      v-if="isTreasurer"
+      class="mb-4 bg-red-100 dark:bg-red-700 text-red-800 dark:text-red-200 px-6 py-4 rounded-lg shadow-sm flex items-center justify-between"
+    >
+      <span class="text-base font-medium">Total Belum Lunas</span>
+      <span class="text-2xl font-bold tracking-wide">{{
+        formatCurrency(totalUnpaidAmount)
       }}</span>
     </div>
 
@@ -268,24 +277,28 @@ const searchName = ref("");
 const selectedPeriod = ref(null);
 const selectedBlock = ref(null);
 const totalAmount = ref(0);
+const totalUnpaidAmount = ref(0);
 
 const debouncedSearchName = useDebounce(searchName, 400);
 
 watch(page, async () => {
   await refresh();
   fetchTotalAmount();
+  fetchTotalUnpaidAmount();
 });
 
 watch([debouncedSearchName, selectedPeriod, selectedBlock], async () => {
   page.value = 1;
   await refresh();
   fetchTotalAmount();
+  fetchTotalUnpaidAmount();
 });
 
 async function fetchTotalAmount() {
   let query = supabase
     .from("profile_dues")
-    .select("amount_override, profiles(nickname, full_name)");
+    .select("amount_override, profiles(nickname, full_name)")
+    .eq("status", "paid");
 
   const term = debouncedSearchName.value.trim();
 
@@ -335,16 +348,68 @@ async function fetchTotalAmount() {
   );
 }
 
+async function fetchTotalUnpaidAmount() {
+  let query = supabase
+    .from("profile_dues")
+    .select("amount_override, profiles(nickname, full_name)")
+    .eq("status", "unpaid");
+
+  const term = debouncedSearchName.value.trim();
+
+  if (term) {
+    const { data, error } = await query;
+
+    if (error) {
+      console.error("Gagal ambil total unpaid:", error);
+      totalUnpaidAmount.value = 0;
+      return;
+    }
+
+    const filtered = data.filter((item) => {
+      const name = item.profiles?.full_name?.toLowerCase() ?? "";
+      const nick = item.profiles?.nickname?.toLowerCase() ?? "";
+      return (
+        name.includes(term.toLowerCase()) || nick.includes(term.toLowerCase())
+      );
+    });
+
+    totalUnpaidAmount.value = filtered.reduce(
+      (sum, item) => sum + (item.amount_override || 0),
+      0,
+    );
+    return;
+  }
+
+  if (selectedPeriod.value) {
+    const periodId = selectedPeriod.value.value ?? selectedPeriod.value;
+    query = query.eq("billing_period_id", periodId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("Gagal ambil total unpaid:", error);
+    totalUnpaidAmount.value = 0;
+    return;
+  }
+
+  totalUnpaidAmount.value = data.reduce(
+    (sum, item) => sum + (item.amount_override || 0),
+    0,
+  );
+}
+
 const {
   data: duesData,
   refresh,
   pending,
 } = await useAsyncData(
   () =>
-    `profile-dues-page-${page.value}-${debouncedSearchName.value}-${selectedPeriod.value}-${selectedBlock.value}-${kodeRumah}`,
+    `profile-dues-page-${page.value}-${debouncedSearchName.value}-${selectedPeriod.value?.value ?? selectedPeriod.value}-${selectedBlock.value?.value ?? selectedBlock.value}-${kodeRumah}`,
   async () => {
     const term = debouncedSearchName.value.trim().toLowerCase();
     const periodId = selectedPeriod.value?.value ?? selectedPeriod.value;
+    console.log("periodId", periodId);
     const blockId = selectedBlock.value?.value;
     // console.log("term", term);
     console.log("periodId", periodId);
@@ -364,14 +429,14 @@ const {
       .range(from.value, to.value)
       .order("due_date", { ascending: false });
 
+    // Filter periode
+    if (periodId) {
+      query = query.eq("billing_period_id", periodId);
+    }
+
     if (kodeRumah != null && kodeRumah != undefined) {
       query = query.eq("house_number.code", kodeRumah);
     } else {
-      // Filter periode
-      if (periodId) {
-        query = query.eq("billing_period_id", periodId);
-      }
-
       if (blockId !== null && blockId !== "all") {
         query = query.eq("house_number.housing_block_id", blockId);
       }
@@ -440,22 +505,6 @@ const columns: TableColumn[] = [
     header: "No Rumah",
     cell: ({ row }) => row.original.house_number.name,
   },
-  {
-    accessorKey: "billing_periods.month",
-    header: "Periode",
-    cell: ({ row }) =>
-      `${namaBulanDariAngka(row.original.billing_periods.month)}/${row.original.billing_periods.year}`,
-  },
-  {
-    accessorKey: "payment_methods.name",
-    header: "Metode Bayar",
-    cell: ({ row }) => row.original.payment_methods.name,
-  },
-  {
-    accessorKey: "amount_override",
-    header: "Jumlah",
-    cell: ({ row }) => formatCurrency(row.getValue("amount_override")),
-  },
 
   {
     accessorKey: "status",
@@ -479,6 +528,23 @@ const columns: TableColumn[] = [
       );
     },
   },
+  {
+    accessorKey: "billing_periods.month",
+    header: "Periode",
+    cell: ({ row }) =>
+      `${namaBulanDariAngka(row.original.billing_periods.month)}/${row.original.billing_periods.year}`,
+  },
+  {
+    accessorKey: "payment_methods.name",
+    header: "Metode Bayar",
+    cell: ({ row }) => row.original.payment_methods.name,
+  },
+  {
+    accessorKey: "amount_override",
+    header: "Jumlah",
+    cell: ({ row }) => formatCurrency(row.getValue("amount_override")),
+  },
+
   // {
   //   accessorKey: "status",
   //   header: "Status",
@@ -533,7 +599,7 @@ const columns: TableColumn[] = [
         ),
       ];
 
-      if (row.original.code) {
+      if (row.original.code && row.original.status === "paid") {
         buttons.push(
           h(
             UButton,
@@ -731,6 +797,7 @@ const isReady = ref(false);
 onMounted(async () => {
   roleName.value = await getRoleName();
   fetchTotalAmount();
+  fetchTotalUnpaidAmount();
   const [profilesRes, paymentsRes, periodsRes, housesRes, blocksRes] =
     await Promise.all([
       supabase.from("profiles").select("id, nickname").eq("role", "resident"),
