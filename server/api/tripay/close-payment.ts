@@ -38,7 +38,61 @@ export default defineEventHandler(async (event) => {
     return { status: 404, error: 'House not found' };
   }
 
+  // 🔍 Cek apakah ada tagihan unpaid
+  const { data: unpaidDues, error: duesError } = await client
+    .from('profile_dues')
+    .select(`
+    id,
+    amount_override,
+    due_date,
+    billing_period_id,
+    billing_periods (
+      month,
+      year
+    )
+  `)
+    .eq('house_number_id', house.id)
+    .eq('status', 'unpaid');
 
+
+  if (duesError) {
+    return { status: 500, error: 'Failed to check dues' };
+  }
+
+  if (!unpaidDues || unpaidDues.length === 0) {
+    return { status: 400, error: 'Tidak ada tagihan bulan ini yang belum dibayar bro..' };
+  }
+
+  // Hitung total dari tagihan
+  const totalAmount = unpaidDues.reduce((sum, due) => {
+    return sum + (due.amount_override || parseInt(amount));
+  }, 0);
+
+  // Buat array order_items dari tagihan
+
+  const orderItems = unpaidDues.map((due) => {
+    const { billing_periods: period } = due;
+    let monthLabel = 'Tanpa Periode';
+
+    if (period && period.month && period.year) {
+      const date = new Date(period.year, period.month - 1); // bulan dimulai dari 0
+      monthLabel = date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+    }
+
+    return {
+      sku: 'DUES-' + due.id,
+      name: 'Iuran Warga - Periode ' + monthLabel,
+      price: due.amount_override || parseInt(amount),
+      quantity: 1,
+      product_url: '',
+      image_url: '',
+    };
+  });
+
+
+  if (totalAmount === 0 || orderItems.length === 0) {
+    return { status: 400, error: 'Total unpaid dues is 0 or empty order items' };
+  }
   // return {
   //   status: 200,
   //   data: {
@@ -66,30 +120,42 @@ export default defineEventHandler(async (event) => {
   const expiredTime = Math.floor(Date.now() / 1000) + (24 * 60 * 60); // 24 jam
 
   const signature = crypto.createHmac('sha256', privateKey)
-    .update(merchantCode + merchantRef + amount)
+    .update(merchantCode + merchantRef + totalAmount)
     .digest('hex');
 
   const payload = {
     method: 'QRISC',
     merchant_ref: merchantRef,
-    amount,
-    customer_name: house.name + ' ' + house.profiles.full_name,
+    amount: totalAmount,
+    customer_name: house.name + '/' + house.profiles.full_name,
     customer_email: email,
     customer_phone: phone,
-    order_items: [
-      {
-        sku: 'IuranWarga' + house.name,
-        name: 'Iuran Warga',
-        price: amount,
-        quantity: 1,
-        product_url: '',
-        image_url: '',
-      },
-    ],
+    order_items: orderItems,
     return_url: callback_url,
     expired_time: expiredTime,
     signature
   };
+  // const payload = {
+  //   method: 'QRISC',
+  //   merchant_ref: merchantRef,
+  //   amount,
+  //   customer_name: house.name + ' / ' + house.profiles.full_name,
+  //   customer_email: email,
+  //   customer_phone: phone,
+  //   order_items: [
+  //     {
+  //       sku: 'IuranWarga' + house.name,
+  //       name: 'Iuran Warga',
+  //       price: amount,
+  //       quantity: 1,
+  //       product_url: '',
+  //       image_url: '',
+  //     },
+  //   ],
+  //   return_url: callback_url,
+  //   expired_time: expiredTime,
+  //   signature
+  // };
 
   // const tripayUrl = `https://tripay.co.id/api-sandbox/transaction/create`; // or use util
   const tripayUrl = `${getTripayBaseUrl()}/transaction/create`;

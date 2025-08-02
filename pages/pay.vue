@@ -14,9 +14,30 @@
         Bayar Sekarang
       </UButton>
 
-      <div v-if="result?.data?.data" class="mt-6 text-center space-y-6">
+      <div
+        v-if="result?.data?.data"
+        class="mt-6 text-center space-y-6 text-gray-700 dark:text-white"
+      >
         <h2 class="text-xl font-semibold">
           {{ result.data.data.customer_name }}
+        </h2>
+
+        <ul>
+          <li v-for="(item, idx) in result.data.data.order_items" :key="idx">
+            {{ item.name }}
+          </li>
+        </ul>
+
+        <p>Total yang harus dibayar</p>
+
+        <h2 class="text-xl font-semibold text-green-500">
+          {{
+            new Intl.NumberFormat("id-ID", {
+              style: "currency",
+              currency: "IDR",
+              minimumFractionDigits: 0,
+            }).format(result.data.data.amount)
+          }}
         </h2>
 
         <!-- QR CODE -->
@@ -97,6 +118,10 @@ async function makePayment() {
 
   console.log(res);
   result.value = res;
+
+  if (res.status === 400) {
+    alert(res.error);
+  }
 }
 
 // Format currency Rp
