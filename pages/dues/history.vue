@@ -585,7 +585,7 @@ const columns: TableColumn[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      if (!isTreasurer.value) return null;
+      if (!isTreasurer.value || row.original.status === "unpaid") return null;
 
       const buttons = [
         h(
@@ -703,16 +703,39 @@ function mapFormToPayload(form: any) {
 async function submitForm() {
   const { id } = form.value;
   const payload = mapFormToPayload(form.value);
-  // console.log("payload", payload);
+
   if (!isEdit.value) {
     payload.code = generateRandomCode();
   }
 
+  // 🔍 Cek apakah data sudah ada
+  const { data: existingDues, error: checkError } = await supabase
+    .from("profile_dues")
+    .select("*")
+    .eq("billing_period_id", payload.billing_period_id)
+    .eq("house_number_id", payload.house_number_id)
+    .eq("status", "unpaid")
+    .maybeSingle(); // gunakan maybeSingle agar tidak error kalau hasilnya null
+
   let res;
 
-  if (!isEdit.value) {
+  if (existingDues) {
+    // ✅ Kalau data sudah ada → update jadi paid
+    res = await supabase
+      .from("profile_dues")
+      .update({
+        status: "paid",
+        amount_override: payload.amount_override,
+        due_date: payload.due_date,
+      })
+      .eq("id", existingDues.id)
+      .select()
+      .single();
+  } else if (!isEdit.value) {
+    // ✅ Insert baru
     res = await supabase.from("profile_dues").insert(payload).select().single();
   } else {
+    // ✅ Edit mode
     res = await supabase
       .from("profile_dues")
       .update(payload)
@@ -728,15 +751,15 @@ async function submitForm() {
 
   const dues = res.data;
 
-  // ✅ Tambah ke cash_flows hanya saat insert baru
-  if (!isEdit.value && dues?.id) {
+  // ✅ Tambah ke cash_flows hanya jika insert baru
+  if (!isEdit.value) {
     const cashFlowPayload = {
       date: payload.due_date,
       type: "in",
       amount: payload.amount_override,
       description: `Pembayaran iuran bulan ${form.value.billing_period_id?.label} oleh ${selected_profile_id.value?.label}`,
       source: "iuran",
-      category_id: null, // kalau belum ada kategori bisa diisi null
+      category_id: null,
       recorded_by: payload.profile_id,
       reference_id: dues.id,
     };
@@ -755,6 +778,61 @@ async function submitForm() {
   await refresh();
   showForm.value = false;
 }
+// async function submitForm() {
+//   const { id } = form.value;
+//   const payload = mapFormToPayload(form.value);
+//   // console.log("payload", payload);
+//   if (!isEdit.value) {
+//     payload.code = generateRandomCode();
+//   }
+//
+//   let res;
+//
+//   if (!isEdit.value) {
+//     res = await supabase.from("profile_dues").insert(payload).select().single();
+//   } else {
+//     res = await supabase
+//       .from("profile_dues")
+//       .update(payload)
+//       .eq("id", id!)
+//       .select()
+//       .single();
+//   }
+//
+//   if (res.error) {
+//     console.error(res.error);
+//     return;
+//   }
+//
+//   const dues = res.data;
+//
+//   // ✅ Tambah ke cash_flows hanya saat insert baru
+//   if (!isEdit.value && dues?.id) {
+//     const cashFlowPayload = {
+//       date: payload.due_date,
+//       type: "in",
+//       amount: payload.amount_override,
+//       description: `Pembayaran iuran bulan ${form.value.billing_period_id?.label} oleh ${selected_profile_id.value?.label}`,
+//       source: "iuran",
+//       category_id: null, // kalau belum ada kategori bisa diisi null
+//       recorded_by: payload.profile_id,
+//       reference_id: dues.id,
+//     };
+//
+//     const cashRes = await supabase
+//       .from("cash_flows")
+//       .insert(cashFlowPayload)
+//       .select()
+//       .single();
+//
+//     if (cashRes.error) {
+//       console.error("Gagal simpan ke cash_flows:", cashRes.error);
+//     }
+//   }
+//
+//   await refresh();
+//   showForm.value = false;
+// }
 
 // async function submitForm() {
 //   // const { id, ...payload } = form.value;
