@@ -39,7 +39,7 @@ Terima kasih atas pembayaran iuran warga yang telah dilakukan. Berikut detail pe
 👤 *Nama*: *${data.profiles?.nickname}*  
 🏘️ *Blok*: ${data.house_number?.name ?? '-'}  
 📅 *Periode*: ${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}  
-💰 *Nominal*: Rp ${Number(data.amount).toLocaleString('id-ID')}  
+💰 *Nominal*: Rp ${Number(data.amount_override).toLocaleString('id-ID')}  
 📄 *Invoice*: ${invoiceUrl}
 
 Kontribusi ini sangat membantu dalam menjaga kelancaran kegiatan dan operasional lingkungan RT kita tercinta.
@@ -63,7 +63,7 @@ Pengurus RT 007.
     const response = await fetch('https://api.fonnte.com/send', {
       method: 'POST',
       headers: {
-        Authorization: process.env.FONNTE_TOKEN ?? '',
+        Authorization: process.env.NUXT_FONNTE ?? '',
       },
       body: payload,
     })

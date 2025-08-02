@@ -991,6 +991,7 @@ if (import.meta.server) {
 }
 
 async function sendInvoiceViaWa(data: any) {
+  console.log(data);
   if (!data?.profiles?.phone_number || !data?.code) {
     alert("Nomor telepon tidak tersedia atau data tidak lengkap");
     return;
