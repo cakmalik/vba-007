@@ -2,13 +2,67 @@ import axios from 'axios';
 import crypto from 'crypto';
 import { getTripayBaseUrl } from '~/utils/tripay';
 
+import { serverSupabaseClient } from '#supabase/server'
+
 const apiKey = process.env.TRIPAY_API_KEY!;
 const privateKey = process.env.TRIPAY_PRIVATE_KEY!;
 const merchantCode = process.env.TRIPAY_MERCHANT_CODE!;
+const amount = process.env.TRIPAY_AMOUNT!;
+const callback_url = process.env.TRIPAY_CALLBACK_URL!
 
-export default defineEventHandler(async () => {
-  const merchantRef = 'INV345675';
-  const amount = 1000000;
+
+export default defineEventHandler(async (event) => {
+  const client = await serverSupabaseClient(event)
+
+  const body = await readBody(event);
+  const houseId = body.house_id;
+
+  if (!houseId) {
+    return { status: 400, error: 'Missing house_id' };
+  }
+
+  const { data: house, error } = await client
+    .from('house_number')
+    .select(`
+      id,
+      name,
+      profiles (
+        full_name,
+        phone_number
+      )
+    `)
+    .eq('id', houseId)
+    .single();
+
+  if (error || !house) {
+    return { status: 404, error: 'House not found' };
+  }
+
+
+  // return {
+  //   status: 200,
+  //   data: {
+  //     id: house.id,
+  //     name: house.name,
+  //     profiles: house.profiles,
+  //   },
+  // }
+  //
+
+
+
+
+
+
+
+
+
+
+
+  const email = house.name.replace(/[^a-zA-Z0-9]/g, '') + '@gmail.com';
+  const phone = house.profiles.phone_number.replace(/[^0-9]/g, '');
+
+  const merchantRef = 'INV-' + Date.now();
   const expiredTime = Math.floor(Date.now() / 1000) + (24 * 60 * 60); // 24 jam
 
   const signature = crypto.createHmac('sha256', privateKey)
@@ -19,28 +73,20 @@ export default defineEventHandler(async () => {
     method: 'QRISC',
     merchant_ref: merchantRef,
     amount,
-    customer_name: 'Nama Pelanggan',
-    customer_email: 'emailpelanggan@domain.com',
-    customer_phone: '081234567890',
+    customer_name: house.name + ' ' + house.profiles.full_name,
+    customer_email: email,
+    customer_phone: phone,
     order_items: [
       {
-        sku: 'PRODUK1',
-        name: 'Nama Produk 1',
-        price: 500000,
+        sku: 'IuranWarga' + house.name,
+        name: 'Iuran Warga',
+        price: amount,
         quantity: 1,
-        product_url: 'https://tokokamu.com/product/nama-produk-1',
-        image_url: 'https://tokokamu.com/product/nama-produk-1.jpg',
+        product_url: '',
+        image_url: '',
       },
-      {
-        sku: 'PRODUK2',
-        name: 'Nama Produk 2',
-        price: 500000,
-        quantity: 1,
-        product_url: 'https://tokokamu.com/product/nama-produk-2',
-        image_url: 'https://tokokamu.com/product/nama-produk-2.jpg',
-      }
     ],
-    return_url: 'https://domainanda.com/redirect',
+    return_url: callback_url,
     expired_time: expiredTime,
     signature
   };

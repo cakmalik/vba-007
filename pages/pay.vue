@@ -86,7 +86,15 @@ const getHouseNumbers = async () => {
 onMounted(getHouseNumbers);
 
 async function makePayment() {
-  const res = await $fetch("/api/tripay/close-payment");
+  if (!selectedHouse.value) return;
+
+  const res = await $fetch("/api/tripay/close-payment", {
+    method: "POST",
+    body: {
+      house_id: selectedHouse.value.value,
+    },
+  });
+
   console.log(res);
   result.value = res;
 }
