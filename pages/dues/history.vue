@@ -991,65 +991,21 @@ if (import.meta.server) {
 }
 
 async function sendInvoiceViaWa(data: any) {
-  const phoneNumber = parsePhoneNumber(data?.profiles?.phone_number ?? "");
-  const invoiceUrl = `${window.location.origin}/invoice/${data?.code}`;
-
-  console.log("invoiceUrl", invoiceUrl);
-
-  if (!phoneNumber) {
-    alert("Nomor telepon tidak tersedia");
+  if (!data?.profiles?.phone_number || !data?.code) {
+    alert("Nomor telepon tidak tersedia atau data tidak lengkap");
     return;
   }
 
-  const payload = new FormData();
-  payload.append("target", phoneNumber);
-  // payload.append(
-  //   "message",
-  //   `Halo ${data.profiles?.full_name}, berikut adalah bukti iuran Anda bulan ${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}`,
-  // );
-
-  payload.append(
-    "message",
-    `Assalamu’alaikum Wr. Wb.
-
-Terima kasih atas pembayaran iuran warga yang telah dilakukan. Berikut detail pembayarannya:
-
-👤 *Nama*: *${data.profiles?.nickname}*  
-🏘️ *Blok*: ${data.house_number?.name ?? "-"}  
-📅 *Periode*: ${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}  
-💰 *Nominal*: Rp ${Number(data.amount).toLocaleString("id-ID")}  
-📄 *Invoice*: ${invoiceUrl}
-
-Kontribusi ini sangat membantu dalam menjaga kelancaran kegiatan dan operasional lingkungan RT kita tercinta.
-
-Semoga kebaikan Bapak/Ibu mendapatkan balasan yang lebih baik dari Allah SWT, serta diberikan kelapangan rezeki dan keberkahan.
-
-Wassalamu’alaikum Wr. Wb.  
-Hormat kami,  
-Pengurus RT 007.
-
-#Pesan ini otomatis, gausah bales gapapa.`,
-  );
-
-  payload.append("url", invoiceUrl);
-  payload.append("filename", `invoice-${data.code}.pdf`);
-  payload.append("schedule", "0");
-  payload.append("delay", "2");
-  payload.append("countryCode", "62");
-
   try {
-    const response = await fetch("https://api.fonnte.com/send", {
+    const response = await fetch("/api/send-wa", {
       method: "POST",
       headers: {
-        Authorization: "4JcyBTUcM3h1M86TzF3Q",
-        // Authorization: config.fonnte,
+        "Content-Type": "application/json",
       },
-      body: payload,
+      body: JSON.stringify(data),
     });
 
     const res = await response.json();
-    console.log("Res WA:", res);
-    // console.log("token", config.fonnte);
 
     if (res.status) {
       alert("Invoice berhasil dikirim via WhatsApp");
@@ -1061,6 +1017,77 @@ Pengurus RT 007.
     alert("Terjadi kesalahan saat mengirim pesan.");
   }
 }
+// async function sendInvoiceViaWa(data: any) {
+//   const phoneNumber = parsePhoneNumber(data?.profiles?.phone_number ?? "");
+//   const invoiceUrl = `${window.location.origin}/invoice/${data?.code}`;
+//
+//   console.log("invoiceUrl", invoiceUrl);
+//
+//   if (!phoneNumber) {
+//     alert("Nomor telepon tidak tersedia");
+//     return;
+//   }
+//
+//   const payload = new FormData();
+//   payload.append("target", phoneNumber);
+//   // payload.append(
+//   //   "message",
+//   //   `Halo ${data.profiles?.full_name}, berikut adalah bukti iuran Anda bulan ${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}`,
+//   // );
+//
+//   payload.append(
+//     "message",
+//     `Assalamu’alaikum Wr. Wb.
+//
+// Terima kasih atas pembayaran iuran warga yang telah dilakukan. Berikut detail pembayarannya:
+//
+// 👤 *Nama*: *${data.profiles?.nickname}*
+// 🏘️ *Blok*: ${data.house_number?.name ?? "-"}
+// 📅 *Periode*: ${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}
+// 💰 *Nominal*: Rp ${Number(data.amount).toLocaleString("id-ID")}
+// 📄 *Invoice*: ${invoiceUrl}
+//
+// Kontribusi ini sangat membantu dalam menjaga kelancaran kegiatan dan operasional lingkungan RT kita tercinta.
+//
+// Semoga kebaikan Bapak/Ibu mendapatkan balasan yang lebih baik dari Allah SWT, serta diberikan kelapangan rezeki dan keberkahan.
+//
+// Wassalamu’alaikum Wr. Wb.
+// Hormat kami,
+// Pengurus RT 007.
+//
+// #Pesan ini otomatis, gausah bales gapapa.`,
+//   );
+//
+//   payload.append("url", invoiceUrl);
+//   payload.append("filename", `invoice-${data.code}.pdf`);
+//   payload.append("schedule", "0");
+//   payload.append("delay", "2");
+//   payload.append("countryCode", "62");
+//
+//   try {
+//     const response = await fetch("https://api.fonnte.com/send", {
+//       method: "POST",
+//       headers: {
+//         Authorization: "4JcyBTUcM3h1M86TzF3Q",
+//         // Authorization: config.fonnte,
+//       },
+//       body: payload,
+//     });
+//
+//     const res = await response.json();
+//     console.log("Res WA:", res);
+//     // console.log("token", config.fonnte);
+//
+//     if (res.status) {
+//       alert("Invoice berhasil dikirim via WhatsApp");
+//     } else {
+//       alert("Gagal mengirim WA: " + (res.reason || "Unknown error"));
+//     }
+//   } catch (error) {
+//     console.error("WA error:", error);
+//     alert("Terjadi kesalahan saat mengirim pesan.");
+//   }
+// }
 
 function parsePhoneNumber(raw: string): string {
   let phone = raw.replace(/\D/g, ""); // hapus semua non-digit
