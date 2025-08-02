@@ -63,7 +63,7 @@ Pengurus RT 007.
     const response = await fetch('https://api.fonnte.com/send', {
       method: 'POST',
       headers: {
-        Authorization: process.env.NUXT_FONNTE ?? '',
+        Authorization: process.env.NUXT_FONNTE ?? '4JcyBTUcM3h1M86TzF3Q',
       },
       body: payload,
     })
