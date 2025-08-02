@@ -990,6 +990,24 @@ if (import.meta.server) {
   const tokenwa = config.fonnte;
 }
 
+const toast = useToast();
+
+function showToast(success = true) {
+  if (!success) {
+    toast.add({
+      title: "Upss!",
+      description: "Gagal mengirim wa",
+      color: "error",
+    });
+  } else {
+    toast.add({
+      title: "Yeee",
+      description: "Berhasil mengirim wa ke Ybs",
+      color: "success",
+    });
+  }
+}
+
 async function sendInvoiceViaWa(data: any) {
   console.log(data);
   if (!data?.profiles?.phone_number || !data?.code) {
@@ -1009,13 +1027,14 @@ async function sendInvoiceViaWa(data: any) {
     const res = await response.json();
 
     if (res.status) {
-      alert("Invoice berhasil dikirim via WhatsApp");
+      showToast();
     } else {
-      alert("Gagal mengirim WA: " + (res.reason || "Unknown error"));
+      console.error("WA error:", res);
+      showToast(false);
     }
   } catch (error) {
     console.error("WA error:", error);
-    alert("Terjadi kesalahan saat mengirim pesan.");
+    showToast(false);
   }
 }
 // async function sendInvoiceViaWa(data: any) {
