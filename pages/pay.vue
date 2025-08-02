@@ -119,7 +119,7 @@ async function makePayment() {
   console.log(res);
   result.value = res;
 
-  if (res.status === 400) {
+  if (res.status != 200) {
     alert(res.error);
   }
 }

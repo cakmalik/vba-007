@@ -169,6 +169,49 @@ export default defineEventHandler(async (event) => {
       },
     });
 
+    const tripayData = response.data.data;
+
+    // Simpan ke Supabase
+    const { error: insertError } = await client.from('tripay_transactions').insert({
+      reference: tripayData.reference,
+      merchant_ref: tripayData.merchant_ref,
+      payment_method: tripayData.payment_method,
+      payment_method_code: tripayData.payment_name, // ganti kalau nama kolom beda
+      total_amount: tripayData.amount,
+      fee_merchant: tripayData.fee_merchant || 0,
+      fee_customer: tripayData.fee_customer || 0,
+      total_fee: tripayData.total_fee || 0,
+      amount_received: tripayData.amount_received,
+      status: tripayData.status,
+      is_closed_payment: tripayData.is_closed_payment ?? true,
+      paid_at: tripayData.paid_at ? new Date(tripayData.paid_at) : null,
+      note: tripayData.note || null,
+    });
+
+    if (insertError) {
+      console.error("Failed to insert transaction:", insertError);
+      return { status: 500, error: 'Transaksi berhasil, tapi gagal menyimpan ke database' };
+    }
+
+    // Ambil reference dari response Tripay
+    const tripayRef = tripayData.reference;
+
+    // Ambil semua ID profile_dues dari orderItems
+    const dueIds = unpaidDues.map(due => due.id);
+
+    // Update masing-masing profile_dues dengan tripay_ref
+    const { error: updateError } = await client
+      .from('profile_dues')
+      .update({ tripay_ref: tripayRef })
+      .in('id', dueIds);
+
+    if (updateError) {
+      console.error("Gagal mengupdate tripay_ref di profile_dues:", updateError);
+      return {
+        status: 500,
+        error: 'Gagal mengupdate tagihan dengan tripay_ref'
+      };
+    }
     return {
       status: response.status,
       data: response.data,
