@@ -8,6 +8,12 @@
           placeholder="Golek tonggo here..."
         />
       </div>
+
+      <div class="flex justify-end px-4 py-2">
+        <UButton icon="i-heroicons-plus" @click="openCreateForm">
+          Tambah Warga
+        </UButton>
+      </div>
       <UTable
         v-model:global-filter="globalFilter"
         :data="residentData"
@@ -134,6 +140,32 @@
         </div>
       </template>
     </UDrawer>
+
+    <UModal v-model:open="modalFormOpen">
+      <template #content>
+        <div class="p-6 space-y-4">
+          <h2 class="text-lg font-semibold">
+            {{ isEditMode ? "Edit Warga" : "Tambah Warga" }}
+          </h2>
+
+          <UInput v-model="form.full_name" placeholder="Nama Lengkap" />
+          <UInput v-model="form.nickname" placeholder="Nama Panggilan" />
+          <UInput v-model="form.phone_number" placeholder="Nomor HP" />
+          <UInput v-model="form.occupation" placeholder="Pekerjaan" />
+
+          <div class="flex justify-end gap-2">
+            <UButton
+              color="gray"
+              variant="ghost"
+              @click="modalFormOpen = false"
+            >
+              Batal
+            </UButton>
+            <UButton color="primary" @click="submitForm"> Simpan </UButton>
+          </div>
+        </div>
+      </template>
+    </UModal>
   </NuxtLayout>
 </template>
 
@@ -280,22 +312,22 @@ const columns: TableColumn<Resident>[] = [
 
 // const toast = useToast()
 // const { copy } = useClipboard()
-function getRowItems(row: Row<Payment>) {
-  return [
-    {
-      label: "Lihat Profile",
-      onSelect() {
-        showProfile(row.original.id);
-      },
-    },
-    {
-      label: "Nomor Rumah",
-      onSelect() {
-        showEditHouseNumber(row.original.id);
-      },
-    },
-  ];
-}
+// function getRowItems(row: Row<Payment>) {
+//   return [
+//     {
+//       label: "Lihat Profile",
+//       onSelect() {
+//         showProfile(row.original.id);
+//       },
+//     },
+//     {
+//       label: "Nomor Rumah",
+//       onSelect() {
+//         showEditHouseNumber(row.original.id);
+//       },
+//     },
+//   ];
+// }
 
 const profile = ref({
   full_name: "",
@@ -486,4 +518,87 @@ onMounted(async () => {
 });
 
 const isTreasurer = computed(() => roleName.value === "treasurer");
+
+const modalFormOpen = ref(false);
+const isEditMode = ref(false);
+
+const form = ref({
+  id: null as string | null,
+  full_name: "",
+  nickname: "",
+  phone_number: "",
+  occupation: "",
+});
+
+function openCreateForm() {
+  isEditMode.value = false;
+  form.value = {
+    id: null,
+    full_name: "",
+    nickname: "",
+    phone_number: "",
+    occupation: "",
+  };
+  modalFormOpen.value = true;
+}
+
+function openEditForm(profileData: any) {
+  isEditMode.value = true;
+  form.value = {
+    id: profileData.id,
+    full_name: profileData.full_name,
+    nickname: profileData.nickname,
+    phone_number: profileData.phone_number,
+    occupation: profileData.occupation,
+  };
+  modalFormOpen.value = true;
+}
+
+function getRowItems(row: Row<Payment>) {
+  return [
+    {
+      label: "Lihat Profile",
+      onSelect() {
+        showProfile(row.original.id);
+      },
+    },
+    {
+      label: "Nomor Rumah",
+      onSelect() {
+        showEditHouseNumber(row.original.id);
+      },
+    },
+    {
+      label: "Edit Warga",
+      onSelect() {
+        openEditForm(row.original);
+      },
+    },
+  ];
+}
+
+async function submitForm() {
+  const { id, ...data } = form.value;
+
+  if (isEditMode.value && id) {
+    const { error } = await supabase.from("profiles").update(data).eq("id", id);
+
+    if (error) {
+      console.error("Gagal update data", error);
+      return;
+    }
+  } else {
+    const { error } = await supabase
+      .from("profiles")
+      .insert({ ...data, role: "resident" });
+
+    if (error) {
+      console.error("Gagal insert data", error);
+      return;
+    }
+  }
+
+  modalFormOpen.value = false;
+  await refresh();
+}
 </script>
