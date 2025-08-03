@@ -207,16 +207,20 @@ const {
   refresh,
   pending,
 } = await useAsyncData(
-  () => `resident-page-${page.value}`,
+  () => `resident-page-${page.value}-${globalFilter.value}`,
   async () => {
     const { data, error } = await supabase
       .from("profiles")
       .select(`*,house_number(name)`, { count: "exact" })
       .eq("role", "resident")
       // .ilike('full_name', `%${globalFilter.value}%`)
+
       .or(
-        `full_name.ilike.%${globalFilter.value}%,phone_number.ilike.%${globalFilter.value}%, nickname.ilike.%${globalFilter.value}%`,
+        `full_name.ilike.%${globalFilter.value}%,phone_number.ilike.%${globalFilter.value}%,nickname.ilike.%${globalFilter.value}%,partner_name.ilike.%${globalFilter.value}%`,
       )
+      // .or(
+      //   `full_name.ilike.%${globalFilter.value}%,phone_number.ilike.%${globalFilter.value}%, nickname.ilike.%${globalFilter.value}%`,
+      // )
       .range(from.value, to.value);
 
     console.log("daata", data);
@@ -262,11 +266,11 @@ const columns: TableColumn<Resident>[] = [
       ]);
     },
   },
-  // {
-  //   accessorKey: 'nickname',
-  //   header: 'Nama Panggilan',
-  //   cell: ({ row }) => row.getValue('nickname'),
-  // },
+  {
+    accessorKey: "partner_name",
+    header: "Nama Pasangan",
+    cell: ({ row }) => row.getValue("partner_name"),
+  },
   {
     accessorKey: "phone_number",
     header: "Nomor Telepon",
