@@ -8,7 +8,7 @@
     <div class="flex-1 flex flex-col items-center px-4 sm:px-6 lg:px-8 py-6">
       <!-- Header -->
       <header class="w-full max-w-5xl py-4 mb-4 text-center">
-        <h1 class="text-xl font-semibold text-primary">
+        <h1 class="text-xl font-semibold dark:text-white text-primary">
           {{ pageTitle }}
         </h1>
         <p v-if="subtitle" class="text-sm text-gray-400 mt-1">{{ subtitle }}</p>
