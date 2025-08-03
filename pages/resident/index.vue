@@ -83,7 +83,7 @@
 
     <UDrawer v-model:open="showHouseNumber">
       <template #content>
-        <div class="p-4">
+        <div class="p-4 overflow-y-auto max-h-screen">
           <div class="flex items-center justify-between">
             <!-- <h2 class="text-lg font-semibold">Edit Nomor Rumah</h2> -->
             <UButton
@@ -215,7 +215,7 @@ const {
       .eq("role", "resident")
       // .ilike('full_name', `%${globalFilter.value}%`)
       .or(
-        `full_name.ilike.%${globalFilter.value}%,phone_number.ilike.%${globalFilter.value}%`,
+        `full_name.ilike.%${globalFilter.value}%,phone_number.ilike.%${globalFilter.value}%, nickname.ilike.%${globalFilter.value}%`,
       )
       .range(from.value, to.value);
 
