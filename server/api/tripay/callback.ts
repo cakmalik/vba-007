@@ -19,7 +19,7 @@ export default defineEventHandler(async (event: H3Event) => {
     // Ambil profile_dues + profile
     const { data: dues, error: fetchError } = await supabase
       .from('profile_dues')
-      .select('id, amount, profile:profiles(phone_number)')
+      .select('id, amount_override, profile:profiles(phone_number)')
       .eq('tripay_ref', reference)
 
     if (fetchError || !dues || dues.length === 0) {
@@ -96,7 +96,7 @@ export default defineEventHandler(async (event: H3Event) => {
             body: {
               phone_number: phone,
               code: uniqueCode,
-              amount: due.amount
+              amount: due.amount_override
             }
           })
         } catch (waError) {
