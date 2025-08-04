@@ -22,7 +22,7 @@ export default defineEventHandler(async (event: H3Event) => {
     console.log(`[Callback] Mencari data profile_dues dengan reference: ${reference}`)
     const { data: dues, error: fetchError } = await supabase
       .from('profile_dues')
-      .select('id')
+      .select('id, tripay_ref')
       .eq('tripay_ref', reference)
 
     if (fetchError || !dues || dues.length === 0) {
@@ -66,16 +66,23 @@ export default defineEventHandler(async (event: H3Event) => {
         })
         .eq('id', due.id)
 
-      if (updateError) {
+      const { error: updateError2 } = await supabase
+        .from('tripay_transactions')
+        .update({
+          status: 'paid',
+          paid_at: paidAt,
+        })
+        .eq('reference', due.tripay_ref)
+
+      if (updateError || updateError2) {
         console.error('[Callback] Gagal update status profile_dues:', updateError)
+        console.error('[Callback] Gagal update status tripay_transactions:', updateError2)
         return sendError(event, createError({
           statusCode: 500,
           statusMessage: 'Gagal update profile_dues',
           data: updateError
         }))
       }
-
-      //
 
       console.log(`[Callback] Berhasil update profile_dues ID: ${due.id}`)
 
