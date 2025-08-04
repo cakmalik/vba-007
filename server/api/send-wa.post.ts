@@ -81,7 +81,7 @@ Pengurus RT 007.
   const tembusan = process.env.NOMER_NOTIF_TEMBUSAN ?? '6283853457929'
   const phoneNumber2 = parsePhoneNumber(tembusan)
 
-  const message2 = `#NotifikasiRT Pembayaran Masuk
+  const message2 = `📌007#Tembusan
 ==================
 
 👤 *Nama*: *${data.profiles?.nickname}*  
