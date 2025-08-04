@@ -10,7 +10,12 @@
         :loading="isLoading"
       />
 
-      <UButton :disabled="!selectedHouse" @click="makePayment" color="primary">
+      <UButton
+        :disabled="!selectedHouse || isProcessing"
+        :loading="isProcessing"
+        @click="makePayment"
+        color="primary"
+      >
         Bayar Sekarang
       </UButton>
 
@@ -86,6 +91,7 @@ const supabase = useSupabaseClient();
 const selectedHouse = ref<{ label: string; value: number } | null>(null);
 const houseOptions = ref([]);
 const isLoading = ref(true);
+const isProcessing = ref(false); // <-- TAMBAH INI
 const result = ref<any>(null);
 
 const getHouseNumbers = async () => {
@@ -109,24 +115,27 @@ onMounted(getHouseNumbers);
 async function makePayment() {
   if (!selectedHouse.value) return;
 
-  const res = await $fetch("/api/tripay/close-payment", {
-    method: "POST",
-    body: {
-      house_id: selectedHouse.value.value,
-    },
-  });
+  isProcessing.value = true; // <-- MULAI LOADING
+  try {
+    const res = await $fetch("/api/tripay/close-payment", {
+      method: "POST",
+      body: {
+        house_id: selectedHouse.value.value,
+      },
+    });
 
-  console.log(res);
-  result.value = res;
+    console.log(res);
+    result.value = res;
 
-  if (res.status != 200) {
-    alert(res.error);
+    if (res.status != 200) {
+      alert(res.error);
+    }
+  } catch (error) {
+    alert("Terjadi kesalahan saat membuat pembayaran");
+    console.error(error);
+  } finally {
+    isProcessing.value = false; // <-- SELESAI LOADING
   }
-}
-
-// Format currency Rp
-function formatCurrency(amount: number) {
-  return amount.toLocaleString("id-ID");
 }
 
 const qrImage = ref<HTMLImageElement | null>(null);
