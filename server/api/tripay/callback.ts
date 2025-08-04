@@ -1,6 +1,7 @@
 // server/api/tripay-callback.ts
-import { serverSupabaseClient } from '#supabase/server'
+// import { serverSupabaseClient } from '#supabase/server'
 import { H3Event, readBody } from 'h3'
+import { createClient } from '@supabase/supabase-js'
 
 export default defineEventHandler(async (event: H3Event) => {
   const body = await readBody(event)
@@ -10,8 +11,11 @@ export default defineEventHandler(async (event: H3Event) => {
     return sendError(event, createError({ statusCode: 400, statusMessage: 'Reference tidak ditemukan' }))
   }
 
-  const supabase = serverSupabaseClient(event)
-
+  // const supabase = serverSupabaseClient(event)
+  const supabase = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY! // service role agar bisa update
+  )
   try {
     // Ambil profile_dues berdasarkan tripay_ref
     const { data: dues, error: fetchError } = await supabase
