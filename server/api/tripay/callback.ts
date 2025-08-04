@@ -88,18 +88,32 @@ export default defineEventHandler(async (event: H3Event) => {
         }))
       }
 
-      const phone = due.profile?.phone_number
+      // Query ulang payload setelah update
+      const { data: fullPayload, error: queryError } = await supabase
+        .from('profile_dues')
+        .select(`
+          *,
+          profiles!profile_dues_profile_id_fkey(nickname, full_name, image_url, phone_number),
+          house_number:house_number_id!inner(name, housing_block_id, code),
+          payment_methods!profile_dues_payment_method_id_fkey(name),
+          billing_periods!fk_period(month, year)
+        `)
+        .eq('id', due.id)
+        .order('due_date', { ascending: false })
+        .single()
+
+      if (queryError || !fullPayload) {
+        console.error('[Callback] Gagal ambil payload setelah update:', queryError)
+        continue
+      }
+
+      const phone = fullPayload.profile?.phone_number
       if (phone) {
-        const waPayload = {
-          phone_number: phone,
-          code: uniqueCode,
-          amount: due.amount_override
-        }
 
         try {
           const response = await $fetch('/api/send-wa', {
             method: 'POST',
-            body: waPayload,
+            body: fullPayload,
           })
 
           if (response?.status) {
