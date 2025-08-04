@@ -1,4 +1,5 @@
 
+// server/api/tripay-callback.ts
 import { H3Event, readBody } from 'h3'
 import { createClient } from '@supabase/supabase-js'
 
@@ -16,10 +17,15 @@ export default defineEventHandler(async (event: H3Event) => {
   )
 
   try {
-    // Ambil profile_dues + profile
     const { data: dues, error: fetchError } = await supabase
       .from('profile_dues')
-      .select('id, amount_override, profile:profiles(phone_number)')
+      .select(`
+        id,
+        amount_override,
+        profile:profiles(phone_number, nickname),
+        billing_periods(month, year),
+        house_number(name)
+      `)
       .eq('tripay_ref', reference)
 
     if (fetchError || !dues || dues.length === 0) {
@@ -94,14 +100,23 @@ export default defineEventHandler(async (event: H3Event) => {
           await $fetch('/api/send-wa', {
             method: 'POST',
             body: {
-              phone_number: phone,
+              profiles: {
+                phone_number: due.profile.phone_number,
+                nickname: due.profile.nickname,
+              },
               code: uniqueCode,
-              amount: due.amount_override
+              amount_override: due.amount_override,
+              billing_periods: {
+                month: due.billing_periods?.month,
+                year: due.billing_periods?.year,
+              },
+              house_number: {
+                name: due.house_number?.name,
+              }
             }
           })
         } catch (waError) {
           console.error('Gagal kirim WA:', waError)
-          // WA error tidak fatal, jadi tidak return error
         }
       } else {
         console.warn('Nomor WA tidak ditemukan untuk due id:', due.id)
