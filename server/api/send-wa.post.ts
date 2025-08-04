@@ -1,4 +1,5 @@
-import { H3Event, readBody } from 'h3'
+
+import { H3Event, readBody, getRequestURL } from 'h3'
 import { namaBulanDariAngka } from '~/utils'
 
 function parsePhoneNumber(raw: string): string {
@@ -15,6 +16,23 @@ function parsePhoneNumber(raw: string): string {
   return phone
 }
 
+function createPayload(
+  target: string,
+  message: string,
+  code: string,
+  invoiceUrl: string
+): FormData {
+  const payload = new FormData()
+  payload.append('target', target)
+  payload.append('message', message)
+  payload.append('url', invoiceUrl)
+  payload.append('filename', `invoice-${code}.pdf`)
+  payload.append('schedule', '0')
+  payload.append('delay', '2')
+  payload.append('countryCode', '62')
+  return payload
+}
+
 export default defineEventHandler(async (event: H3Event) => {
   const data = await readBody<any>(event)
 
@@ -25,14 +43,19 @@ export default defineEventHandler(async (event: H3Event) => {
     }
   }
 
+  const token = process.env.NUXT_FONNTE
+  if (!token) {
+    return {
+      status: false,
+      reason: 'Token Fonnte tidak tersedia.',
+    }
+  }
+
   const phoneNumber = parsePhoneNumber(data.profiles.phone_number)
   const invoiceUrl = `${getRequestURL(event).origin}/invoice/${data.code}`
 
-  const payload = new FormData()
-  payload.append('target', phoneNumber)
-  payload.append(
-    'message',
-    `Assalamu’alaikum Wr. Wb.
+  // Pesan utama ke pembayar
+  const message = `Assalamu’alaikum Wr. Wb.
 
 Terima kasih atas pembayaran iuran warga yang telah dilakukan. Berikut detail pembayarannya:
 
@@ -51,31 +74,65 @@ Hormat kami,
 Pengurus RT 007.
 
 #Pesan ini otomatis, gausah bales gapapa.`
-  )
 
-  payload.append('url', invoiceUrl)
-  payload.append('filename', `invoice-${data.code}.pdf`)
-  payload.append('schedule', '0')
-  payload.append('delay', '2')
-  payload.append('countryCode', '62')
+  const payload = createPayload(phoneNumber, message, data.code, invoiceUrl)
+
+  // Pesan tembusan ke pengurus
+  const tembusan = process.env.NOMER_NOTIF_TEMBUSAN ?? '6283853457929'
+  const phoneNumber2 = parsePhoneNumber(tembusan)
+
+  const message2 = `#NotifikasiRT Pembayaran Masuk
+==================
+
+👤 *Nama*: *${data.profiles?.nickname}*  
+🏘️ *Blok*: ${data.house_number?.name ?? '-'}  
+📅 *Periode*: ${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}  
+💰 *Nominal*: Rp ${Number(data.amount_override).toLocaleString('id-ID')}  
+📄 *Invoice*: ${invoiceUrl}`
+
+  const payload2 = createPayload(phoneNumber2, message2, data.code, invoiceUrl)
 
   try {
-    const response = await fetch('https://api.fonnte.com/send', {
-      method: 'POST',
-      headers: {
-        Authorization: process.env.NUXT_FONNTE ?? '4JcyBTUcM3h1M86TzF3Q',
-      },
-      body: payload,
-    })
+    const [res1, res2] = await Promise.all([
+      fetch('https://api.fonnte.com/send', {
+        method: 'POST',
+        headers: {
+          Authorization: token,
+        },
+        body: payload,
+      }),
+      fetch('https://api.fonnte.com/send', {
+        method: 'POST',
+        headers: {
+          Authorization: token,
+        },
+        body: payload2,
+      }),
+    ])
 
-    const res = await response.json()
+    const response1 = await res1.json()
+    const response2 = await res2.json()
+
+    if (!response1.status || !response2.status) {
+      return {
+        status: false,
+        reason:
+          response1.reason ||
+          response2.reason ||
+          'Pengiriman pesan gagal sebagian.',
+      }
+    }
 
     return {
-      status: res.status,
-      reason: res.reason ?? null,
+      status: true,
+      reason: null,
     }
   } catch (error: any) {
-    console.error('WA error:', error)
+    console.error('WA error:', {
+      message: error?.message,
+      stack: error?.stack,
+      error,
+    })
     return {
       status: false,
       reason: 'Terjadi kesalahan saat mengirim pesan.',
