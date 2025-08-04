@@ -14,7 +14,7 @@ export default defineEventHandler(async (event: H3Event) => {
   // const supabase = serverSupabaseClient(event)
   const supabase = createClient(
     process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY! // service role agar bisa update
+    process.env.SUPABASE_SERVICE_ROLE_KEY! // service role agar bisa update -
   )
   try {
     // Ambil profile_dues berdasarkan tripay_ref
