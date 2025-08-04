@@ -1,5 +1,4 @@
-// server/api/tripay-callback.ts ok
-// import { serverSupabaseClient } from '#supabase/server'
+
 import { H3Event, readBody } from 'h3'
 import { createClient } from '@supabase/supabase-js'
 
@@ -11,16 +10,16 @@ export default defineEventHandler(async (event: H3Event) => {
     return sendError(event, createError({ statusCode: 400, statusMessage: 'Reference tidak ditemukan' }))
   }
 
-  // const supabase = serverSupabaseClient(event)
   const supabase = createClient(
     process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY! // service role agar bisa update -
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
+
   try {
-    // Ambil profile_dues berdasarkan tripay_ref
+    // Ambil profile_dues + profile
     const { data: dues, error: fetchError } = await supabase
       .from('profile_dues')
-      .select('id')
+      .select('id, amount, profile:profiles(phone_number)')
       .eq('tripay_ref', reference)
 
     if (fetchError || !dues || dues.length === 0) {
@@ -31,10 +30,8 @@ export default defineEventHandler(async (event: H3Event) => {
       }))
     }
 
-    // Waktu pembayaran (dibuat 1x saja)
     const paidAt = new Date().toISOString()
 
-    // Fungsi generate kode unik
     async function generateUniqueCode() {
       let isUnique = false
       let code = ''
@@ -53,7 +50,6 @@ export default defineEventHandler(async (event: H3Event) => {
       return code
     }
 
-    // Update semua baris
     for (const due of dues) {
       const uniqueCode = await generateUniqueCode()
 
@@ -90,11 +86,29 @@ export default defineEventHandler(async (event: H3Event) => {
           data: errorDetail
         }))
       }
+
+      // Kirim notifikasi WhatsApp
+      const phone = due.profile?.phone_number
+      if (phone) {
+        try {
+          await $fetch('/api/send-wa', {
+            method: 'POST',
+            body: {
+              phone_number: phone,
+              code: uniqueCode,
+              amount: due.amount
+            }
+          })
+        } catch (waError) {
+          console.error('Gagal kirim WA:', waError)
+          // WA error tidak fatal, jadi tidak return error
+        }
+      } else {
+        console.warn('Nomor WA tidak ditemukan untuk due id:', due.id)
+      }
     }
 
-    // Semua berhasil
     return { success: true }
-
 
   } catch (e: unknown) {
     let errorDetail: any = {
@@ -109,7 +123,6 @@ export default defineEventHandler(async (event: H3Event) => {
         stack: e.stack
       }
     } else if (typeof e === 'object' && e !== null) {
-      // coba ambil detail jika objek
       errorDetail = {
         ...e,
         message: (e as any).message ?? 'Unknown object error',
