@@ -75,6 +75,8 @@ export default defineEventHandler(async (event: H3Event) => {
         }))
       }
 
+      //
+
       console.log(`[Callback] Berhasil update profile_dues ID: ${due.id}`)
 
       const { data: detail, error } = await supabase
