@@ -1,4 +1,3 @@
-
 // server/api/tripay-callback.ts
 import { serverSupabaseClient } from '#supabase/server'
 import { H3Event, readBody } from 'h3'
@@ -28,6 +27,9 @@ export default defineEventHandler(async (event: H3Event) => {
       }))
     }
 
+    // Waktu pembayaran (dibuat 1x saja)
+    const paidAt = new Date().toISOString()
+
     // Fungsi generate kode unik
     async function generateUniqueCode() {
       let isUnique = false
@@ -50,26 +52,43 @@ export default defineEventHandler(async (event: H3Event) => {
     // Update semua baris
     for (const due of dues) {
       const uniqueCode = await generateUniqueCode()
+
       const { error: updateError } = await supabase
         .from('profile_dues')
         .update({
           status: 'paid',
-          paid_at: new Date().toISOString(),
+          paid_at: paidAt,
           payment_method_id: 3,
           code: uniqueCode
         })
         .eq('id', due.id)
 
       if (updateError) {
-        console.error(`Gagal update profile_dues ID ${due.id}`, updateError)
+        const errorDetail = {
+          message: updateError.message,
+          hint: updateError.hint,
+          details: updateError.details,
+          code: updateError.code,
+          due_id: due.id,
+          data: {
+            status: 'paid',
+            paid_at: paidAt,
+            payment_method_id: 3,
+            code: uniqueCode
+          }
+        }
+
+        console.error('Gagal update profile_dues:', errorDetail)
+
         return sendError(event, createError({
           statusCode: 500,
-          statusMessage: 'Gagal update salah satu profile_dues',
-          data: updateError
+          statusMessage: 'Gagal update profile_dues',
+          data: errorDetail
         }))
       }
     }
 
+    // Semua berhasil
     return { success: true }
 
   } catch (e) {
