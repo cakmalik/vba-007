@@ -88,39 +88,30 @@ export default defineEventHandler(async (event: H3Event) => {
         }))
       }
 
-      const phone = due?.profile?.phone_number
-
+      const phone = due.profile?.phone_number
       if (phone) {
         const waPayload = {
-          profiles: {
-            phone_number: phone,
-            nickname: due?.profile?.nickname ?? '-',
-          },
+          phone_number: phone,
           code: uniqueCode,
-          amount_override: due.amount_override,
-          billing_periods: {
-            month: due?.billing_periods?.month,
-            year: due?.billing_periods?.year,
-          },
-          house_number: {
-            name: due?.house_number?.name,
-          }
+          amount: due.amount_override
         }
 
-        console.log('[Callback] Mengirim WhatsApp ke:', phone)
-        console.log('[Callback] Payload WA:', JSON.stringify(waPayload, null, 2))
-
         try {
-          await $fetch('/api/send-wa', {
+          const response = await $fetch('/api/send-wa', {
             method: 'POST',
             body: waPayload,
           })
-          console.log('[Callback] WA berhasil dikirim ke:', phone)
+
+          if (response?.status) {
+            console.log('[Callback] WA berhasil dikirim ke:', phone)
+          } else {
+            console.error('[Callback] WA gagal dengan response:', response)
+          }
         } catch (waError) {
-          console.error('[Callback] Gagal mengirim WA:', waError)
+          console.error('[Callback] Gagal mengirim WA (exception):', waError)
         }
       } else {
-        console.warn(`[Callback] Nomor WA tidak ditemukan untuk due ID: ${due.id}`)
+        console.warn('[Callback] Nomor WA tidak ditemukan untuk due id:', due.id)
       }
     }
 
