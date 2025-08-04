@@ -91,12 +91,38 @@ export default defineEventHandler(async (event: H3Event) => {
     // Semua berhasil
     return { success: true }
 
-  } catch (e) {
-    console.error('Unexpected error', e)
+
+  } catch (e: unknown) {
+    let errorDetail: any = {
+      type: typeof e,
+      raw: e
+    }
+
+    if (e instanceof Error) {
+      errorDetail = {
+        name: e.name,
+        message: e.message,
+        stack: e.stack
+      }
+    } else if (typeof e === 'object' && e !== null) {
+      // coba ambil detail jika objek
+      errorDetail = {
+        ...e,
+        message: (e as any).message ?? 'Unknown object error',
+        stack: (e as any).stack ?? null
+      }
+    } else if (typeof e === 'string') {
+      errorDetail = {
+        message: e
+      }
+    }
+
+    console.error('Unexpected error:', errorDetail)
+
     return sendError(event, createError({
       statusCode: 500,
       statusMessage: 'Internal Server Error',
-      data: e
+      data: errorDetail
     }))
   }
 })
