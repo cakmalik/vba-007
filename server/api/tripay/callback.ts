@@ -1,13 +1,15 @@
-
 import { H3Event, readBody, sendError, createError } from 'h3'
 import { createClient } from '@supabase/supabase-js'
-import { $fetch } from 'ofetch' // Penting!
+import { $fetch } from 'ofetch'
 
 export default defineEventHandler(async (event: H3Event) => {
   const body = await readBody(event)
+  console.log('[Callback] Payload masuk:', JSON.stringify(body, null, 2))
+
   const reference = body?.reference
 
   if (!reference) {
+    console.warn('[Callback] Reference tidak ditemukan dalam payload')
     return sendError(event, createError({ statusCode: 400, statusMessage: 'Reference tidak ditemukan' }))
   }
 
@@ -17,12 +19,14 @@ export default defineEventHandler(async (event: H3Event) => {
   )
 
   try {
+    console.log(`[Callback] Mencari data profile_dues dengan reference: ${reference}`)
     const { data: dues, error: fetchError } = await supabase
       .from('profile_dues')
       .select('id')
       .eq('tripay_ref', reference)
 
     if (fetchError || !dues || dues.length === 0) {
+      console.warn('[Callback] Data profile_dues tidak ditemukan atau error:', fetchError)
       return sendError(event, createError({
         statusCode: 404,
         statusMessage: 'Data profile_dues tidak ditemukan',
@@ -44,10 +48,12 @@ export default defineEventHandler(async (event: H3Event) => {
           .limit(1)
         isUnique = !existing || existing.length === 0
       }
+      console.log(`[Callback] Kode unik yang dihasilkan: ${code}`)
       return code
     }
 
     for (const due of dues) {
+      console.log(`[Callback] Memproses profile_dues ID: ${due.id}`)
       const uniqueCode = await generateUniqueCode()
 
       const { error: updateError } = await supabase
@@ -61,12 +67,15 @@ export default defineEventHandler(async (event: H3Event) => {
         .eq('id', due.id)
 
       if (updateError) {
+        console.error('[Callback] Gagal update status profile_dues:', updateError)
         return sendError(event, createError({
           statusCode: 500,
           statusMessage: 'Gagal update profile_dues',
           data: updateError
         }))
       }
+
+      console.log(`[Callback] Berhasil update profile_dues ID: ${due.id}`)
 
       const { data: detail, error } = await supabase
         .from("profile_dues")
@@ -81,6 +90,7 @@ export default defineEventHandler(async (event: H3Event) => {
         .single()
 
       if (error) {
+        console.error('[Callback] Gagal mengambil detail profile_dues:', error)
         return sendError(event, createError({
           statusCode: 500,
           statusMessage: 'Gagal fetch detail profile_dues',
@@ -88,13 +98,15 @@ export default defineEventHandler(async (event: H3Event) => {
         }))
       }
 
+      console.log(`[Callback] Mengirim invoice via WA untuk profile_dues ID: ${due.id}`)
       await sendInvoiceViaWa(detail)
     }
 
+    console.log('[Callback] Semua proses selesai. Transaksi berhasil diproses.')
     return { success: true }
 
   } catch (e: any) {
-    console.error('Unexpected error:', e)
+    console.error('Unexpected error saat memproses callback:', e)
     return sendError(event, createError({
       statusCode: 500,
       statusMessage: 'Internal Server Error',
@@ -108,7 +120,7 @@ async function sendInvoiceViaWa(detail: any) {
   const code = detail?.code
 
   if (!phone || !code) {
-    console.warn('Nomor telepon atau kode tidak lengkap')
+    console.warn('[WA] Nomor telepon atau kode tidak lengkap, WA tidak dikirim')
     return
   }
 
@@ -118,20 +130,21 @@ async function sendInvoiceViaWa(detail: any) {
     cleanPhone = '62' + cleanPhone.slice(1)
   }
 
-  // Masukkan kembali ke detail agar konsisten
   detail.clean_phone = cleanPhone
 
   try {
-    const res = await $fetch('/api/send-wa', {
+    console.log(`[WA] Mengirim pesan WA ke: ${cleanPhone} untuk kode: ${code}`)
+    const res = await $fetch(`${process.env.BASE_URL}/api/send-wa`, {
       method: 'POST',
-      body: detail,
+      body: detail
     })
 
     if (!res?.status) {
-      console.error('Gagal kirim WA:', res)
+      console.error('[WA] Gagal mengirim WA. Respon:', res)
+    } else {
+      console.log('[WA] Pesan WA berhasil dikirim.')
     }
   } catch (err) {
-    console.error('WA error:', err)
+    console.error('[WA] Error saat kirim WA:', err)
   }
 }
-
