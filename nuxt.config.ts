@@ -29,14 +29,14 @@ export default defineNuxtConfig({
   ui: {
     theme: {
       transitions: true
-    }
+    },
   },
   supabase: {
     redirect: true,
     redirectOptions: {
       login: '/dashboard-public',
       callback: '/confirm',
-      exclude: ['/login', '/confirm', '/dues/history', '/cashflow', '/pay', '/dashboard-public', '/resident', '/invoice*'],
+      exclude: ['/login', '/confirm', '/dues/history', '/cashflow', '/pay', '/about', '/dashboard-public', '/resident', '/invoice*'],
     }
   }
   // image: {

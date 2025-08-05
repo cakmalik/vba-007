@@ -9,7 +9,7 @@
         />
       </div>
 
-      <div class="flex justify-end px-4 py-2">
+      <div v-if="isTreasurer" class="flex justify-end px-3 py-2">
         <UButton icon="i-heroicons-plus" @click="openCreateForm">
           Tambah Warga
         </UButton>

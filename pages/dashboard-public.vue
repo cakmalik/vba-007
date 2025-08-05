@@ -60,7 +60,10 @@
 <script setup lang="ts">
 import { getRoleName } from "@/composables/useRole";
 definePageMeta({
-  title: "Dashboard",
+  title: "KASTER",
+  subtitle: "Aplikasi Kas Terpadu RT",
+  subtitle2: "Mencatat Keuangan Warga dengan Mudah dan Transparan",
+  uselogo: true,
 });
 
 const isProd = import.meta.env.PROD;
