@@ -1,6 +1,7 @@
 
 // server/api/generate-tagihan.post.ts
 import { serverSupabaseClient } from '#supabase/server'
+import { readBody, createError } from 'h3'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -15,7 +16,7 @@ export default defineEventHandler(async (event) => {
 
   const client = await serverSupabaseClient(event)
 
-  // Ambil semua house number yang punya profile
+  // Ambil semua house_number yang memiliki profile
   const { data: houseNumbers, error: houseError } = await client
     .from('house_number')
     .select('id, profile_id')
@@ -25,34 +26,33 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 500, statusMessage: houseError.message })
   }
 
-  // Ambil semua profile_id yang sudah punya tagihan untuk periode ini
+  // Ambil semua house_number_id yang sudah punya tagihan di billing_period_id ini
   const { data: existingDues, error: duesError } = await client
     .from('profile_dues')
-    .select('profile_id')
+    .select('house_number_id')
     .eq('billing_period_id', billingPeriodId)
 
   if (duesError) {
     throw createError({ statusCode: 500, statusMessage: duesError.message })
   }
 
-  const existingProfileIds = new Set(existingDues.map(d => d.profile_id))
+  const existingHouseNumberIds = new Set(existingDues.map(d => d.house_number_id))
 
-  // Filter hanya profile_id yang belum ada tagihan
+  // Filter hanya house_number_id yang belum ada tagihan
   const duesToCreate = houseNumbers
-    .filter(hn => !existingProfileIds.has(hn.profile_id))
+    .filter(hn => !existingHouseNumberIds.has(hn.id))
     .map(hn => ({
       profile_id: hn.profile_id,
       house_number_id: hn.id,
       billing_period_id: billingPeriodId,
-      due_date: new Date().toISOString().split('T')[0], // tanggal hari ini
+      due_date: new Date().toISOString().split('T')[0],
       status: 'unpaid',
       amount_override: 50000,
       payment_method_id: 2
     }))
-  // .slice(0, 2);
 
   if (duesToCreate.length === 0) {
-    return { message: 'Semua profile sudah memiliki tagihan.' }
+    return { message: 'Semua house_number sudah memiliki tagihan untuk periode ini.' }
   }
 
   // Insert batch ke profile_dues
