@@ -9,6 +9,7 @@ const privateKey = process.env.TRIPAY_PRIVATE_KEY!;
 const merchantCode = process.env.TRIPAY_MERCHANT_CODE!;
 const amount = process.env.TRIPAY_AMOUNT!;
 const callback_url = process.env.TRIPAY_CALLBACK_URL!
+const is_sandbox = process.env.TRIPAY_USE_SANDBOX!;
 
 
 export default defineEventHandler(async (event) => {
@@ -131,8 +132,8 @@ export default defineEventHandler(async (event) => {
     customer_email: email,
     customer_phone: phone,
     order_items: orderItems,
-    return_url: callback_url,
-    expired_time: expiredTime,
+    // callback_url: callback_url,
+    // expired_time: expiredTime,
     signature
   };
   // const payload = {

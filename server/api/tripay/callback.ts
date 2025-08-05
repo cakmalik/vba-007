@@ -6,6 +6,8 @@ export default defineEventHandler(async (event: H3Event) => {
   const body = await readBody(event)
   console.log('[Callback] Payload masuk:', JSON.stringify(body, null, 2))
 
+
+  const is_sandbox = process.env.TRIPAY_USE_SANDBOX!;
   const reference = body?.reference
 
   if (body.status !== 'PAID') {
@@ -112,8 +114,10 @@ export default defineEventHandler(async (event: H3Event) => {
         }))
       }
 
-      console.log(`[Callback] Mengirim invoice via WA untuk profile_dues ID: ${due.id}`)
-      await sendInvoiceViaWa(detail)
+      if (is_sandbox == 'false') {
+        console.log(`[Callback] Mengirim invoice via WA untuk profile_dues ID: ${due.id}`)
+        await sendInvoiceViaWa(detail)
+      }
     }
 
     console.log('[Callback] Semua proses selesai. Transaksi berhasil diproses.')
