@@ -8,7 +8,11 @@
     <div class="flex-1 flex flex-col items-center px-4 sm:px-6 lg:px-8 py-6">
       <!-- Header -->
 
-      <img src="/icons/icon_192x192.png" class="w-16 h-16 mb-2" />
+      <img
+        src="/icons/icon_192x192.png"
+        class="w-16 h-16 mb-2"
+        v-if="uselogo"
+      />
       <header class="w-full max-w-5xl py-4 mb-4 text-center">
         <h1 class="text-xl font-semibold dark:text-white text-primary">
           {{ pageTitle }}
