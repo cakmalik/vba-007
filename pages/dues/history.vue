@@ -729,6 +729,7 @@ async function submitForm() {
         status: "paid",
         amount_override: payload.amount_override,
         due_date: payload.due_date,
+        code: payload.code,
       })
       .eq("id", existingDues.id)
       .select()
