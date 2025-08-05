@@ -29,7 +29,9 @@
       v-if="isTreasurer"
       class="mb-4 bg-red-100 dark:bg-red-700 text-red-800 dark:text-red-200 px-6 py-4 rounded-lg shadow-sm flex items-center justify-between"
     >
-      <span class="text-base font-medium">Total Belum Lunas</span>
+      <span class="text-base font-medium"
+        >Total Belum Lunas (hanya angka perkiraan jika iuran 50rb semua)</span
+      >
       <span class="text-2xl font-bold tracking-wide">{{
         formatCurrency(totalUnpaidAmount)
       }}</span>
