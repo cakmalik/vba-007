@@ -6,12 +6,14 @@
         class="container mx-auto flex items-center justify-between px-4 py-4"
       >
         <div class="flex items-center space-x-3">
-          <img
-            src="/icons/icon_192x192.png"
-            class="w-8 h-8"
-            alt="KASTER logo"
-          />
-          <span class="text-xl font-semibold">KASTER</span>
+          <NuxtLink to="/" class="flex items-center space-x-2">
+            <img
+              src="/icons/icon_192x192.png"
+              class="w-8 h-8"
+              alt="KASTER logo"
+            />
+            <span class="text-xl font-semibold">KASTER</span>
+          </NuxtLink>
         </div>
         <nav class="flex space-x-4 text-sm">
           <a href="#fitur" class="hover:text-primary-400">Fitur</a>
@@ -26,18 +28,20 @@
     <section
       class="flex flex-col items-center justify-center text-center py-24 px-6"
     >
-      <img
-        src="/icons/icon_192x192.png"
-        alt="KASTER Logo"
-        class="w-24 h-24 mb-4"
-      />
+      <NuxtLink to="/">
+        <img
+          src="/icons/icon_192x192.png"
+          alt="KASTER Logo"
+          class="w-24 h-24 mb-4"
+        />
+      </NuxtLink>
       <h1 class="text-4xl md:text-5xl font-bold mb-2">KASTER</h1>
       <p class="text-lg text-gray-300 mb-4">Aplikasi Kas Terpadu RT</p>
       <p class="text-gray-400 max-w-xl mb-6">
         Mencatat Keuangan Warga dengan Mudah dan Transparan.
       </p>
       <div class="flex gap-4">
-        <UButton size="lg" color="primary" to="/login">Mulai Sekarang</UButton>
+        <UButton size="lg" color="primary" to="/">Mulai Sekarang</UButton>
         <UButton
           size="lg"
           color="gray"
@@ -115,8 +119,9 @@
     <!-- Footer -->
     <footer class="text-center py-6 text-sm text-gray-500">
       &copy; {{ new Date().getFullYear() }} KASTER -
-      <a href="https://wa.me/6285333920007">rt007.site</a>. Semua Hak
-      Dilindungi.
+      <a href="https://wa.me/6285333920007" target="_blank" class="underline"
+        >rt007.site</a
+      >. Semua Hak Dilindungi.
     </footer>
   </div>
 </template>
