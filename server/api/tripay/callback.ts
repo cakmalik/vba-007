@@ -8,6 +8,11 @@ export default defineEventHandler(async (event: H3Event) => {
 
   const reference = body?.reference
 
+  if (body.status !== 'PAID') {
+    console.log(`[Callback] Status bukan PAID (${body.status}), proses diabaikan.`)
+    return { success: true, ignored: true, message: 'Status bukan PAID, proses diabaikan.' }
+  }
+
   if (!reference) {
     console.warn('[Callback] Reference tidak ditemukan dalam payload')
     return sendError(event, createError({ statusCode: 400, statusMessage: 'Reference tidak ditemukan' }))
@@ -59,7 +64,7 @@ export default defineEventHandler(async (event: H3Event) => {
       const { error: updateError } = await supabase
         .from('profile_dues')
         .update({
-          status: 'paid',
+          status: body.status,
           paid_at: paidAt,
           payment_method_id: 3,
           code: uniqueCode
@@ -69,7 +74,7 @@ export default defineEventHandler(async (event: H3Event) => {
       const { error: updateError2 } = await supabase
         .from('tripay_transactions')
         .update({
-          status: 'paid',
+          status: body.status,
           paid_at: paidAt,
         })
         .eq('reference', due.tripay_ref)
