@@ -6,6 +6,7 @@ import { readBody, createError } from 'h3'
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const billingPeriodId = body.billing_period_id
+  const targetHouseNumberId = body.house_number_id || null
 
   if (!billingPeriodId) {
     throw createError({
@@ -16,14 +17,24 @@ export default defineEventHandler(async (event) => {
 
   const client = await serverSupabaseClient(event)
 
-  // Ambil semua house_number yang memiliki profile
-  const { data: houseNumbers, error: houseError } = await client
+  // Ambil semua house_number yang memiliki profile (atau hanya satu jika ada ID)
+  const houseQuery = client
     .from('house_number')
     .select('id, profile_id')
     .not('profile_id', 'is', null)
 
+  if (targetHouseNumberId) {
+    houseQuery.eq('id', targetHouseNumberId)
+  }
+
+  const { data: houseNumbers, error: houseError } = await houseQuery
+
   if (houseError) {
     throw createError({ statusCode: 500, statusMessage: houseError.message })
+  }
+
+  if (!houseNumbers || houseNumbers.length === 0) {
+    return { message: 'Tidak ada house_number valid yang ditemukan.' }
   }
 
   // Ambil semua house_number_id yang sudah punya tagihan di billing_period_id ini
@@ -52,7 +63,7 @@ export default defineEventHandler(async (event) => {
     }))
 
   if (duesToCreate.length === 0) {
-    return { message: 'Semua house_number sudah memiliki tagihan untuk periode ini.' }
+    return { message: 'Tagihan sudah ada atau tidak ada data yang bisa dibuatkan tagihan.' }
   }
 
   // Insert batch ke profile_dues

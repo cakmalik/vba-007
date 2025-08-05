@@ -39,6 +39,41 @@
           icon="i-heroicons-chevron-right"
         />
       </div>
+      <UModal v-model:open="showModal" title="Pilih Periode Tagihan">
+        <UCard>
+          <template #header>
+            <div class="text-lg font-semibold">
+              Pilih Periode untuk {{ selectedHouse?.name }}
+            </div>
+          </template>
+
+          <div class="space-y-4">
+            <USelectMenu
+              v-model="selectedPeriodId"
+              :items="availablePeriods"
+              label="Periode"
+              placeholder="Pilih Periode"
+              class="w-full sm:w-1/2 md:w-1/4"
+            />
+          </div>
+
+          <template #footer>
+            <div class="flex justify-end gap-2 mt-4">
+              <UButton variant="ghost" @click="showModal = false"
+                >Batal</UButton
+              >
+              <UButton
+                color="primary"
+                :loading="generating"
+                :disabled="!selectedPeriodId"
+                @click="generateTagihan"
+              >
+                Generate
+              </UButton>
+            </div>
+          </template>
+        </UCard>
+      </UModal>
     </div>
   </NuxtLayout>
 </template>
@@ -50,6 +85,7 @@ definePageMeta({
 });
 const supabase = useSupabaseClient();
 
+const selectedPeriodId = ref("");
 const page = ref(1);
 const pageSize = 10;
 const hasNextPage = ref(true);
@@ -104,6 +140,20 @@ const columns: TableColumn<HouseNumber>[] = [
       return profiles?.full_name ?? "";
     },
   },
+  {
+    header: "Aksi",
+    cell: ({ row }) => {
+      const house = row.original;
+      return h(
+        "button",
+        {
+          class: "text-sm text-primary hover:underline",
+          onClick: () => openGenerateModal(house),
+        },
+        "Generate Tagihan",
+      );
+    },
+  },
 ];
 
 // Pagination
@@ -148,4 +198,58 @@ const houseName = computed({
     form.name = val.toUpperCase();
   },
 });
+
+const { data: availablePeriods } = await useAsyncData(
+  "available-periods",
+  async () => {
+    const { data, error } = await supabase
+      .from("billing_period")
+      .select("id,month,year");
+    if (error) throw error;
+    return data;
+  },
+);
+
+const showModal = ref(false);
+const generating = ref(false);
+const selectedHouse = ref<HouseNumber | null>(null);
+
+const openGenerateModal = (house: HouseNumber) => {
+  selectedHouse.value = house;
+  showModal.value = true;
+};
+
+const generateTagihan = async () => {
+  if (!selectedHouse.value) return;
+
+  generating.value = true;
+
+  try {
+    await $fetch("/api/generate-tagihan", {
+      method: "POST",
+      body: {
+        billing_period_id: 1, // Ganti sesuai kebutuhan
+        house_number_id: selectedHouse.value.id, // Kirim ID rumah
+      },
+    });
+
+    toast.add({
+      title: "Sukses",
+      description: `Tagihan berhasil dibuat untuk rumah ${selectedHouse.value.name}.`,
+      color: "success",
+    });
+    await refresh();
+  } catch (error: any) {
+    toast.add({
+      title: "Gagal",
+      description:
+        error?.data?.message || error.message || "Terjadi kesalahan.",
+      color: "danger",
+    });
+  } finally {
+    generating.value = false;
+    showModal.value = false;
+    selectedHouse.value = null;
+  }
+};
 </script>
