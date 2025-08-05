@@ -124,7 +124,7 @@ export default defineEventHandler(async (event) => {
     .digest('hex');
 
   const payload = {
-    method: 'QRISC',
+    method: 'QRIS',
     merchant_ref: merchantRef,
     amount: totalAmount,
     customer_name: house.name + '/' + house.profiles.full_name,
