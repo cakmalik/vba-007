@@ -127,12 +127,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = useSupabaseClient();
 const route = useRoute();
 const receiptCode = route.params.code;
+const router = useRouter();
 
 const form = ref(null);
 

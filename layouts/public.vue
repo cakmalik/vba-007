@@ -1,8 +1,14 @@
 <template>
   <div class="min-h-screen bg-dark text-neutral-200 flex flex-col">
-    <div class="fixed top-0 right-0 p-4 z-50">
+    <div class="fixed top-0 right-0 p-4 z-50 flex gap-2">
       <ColorModeButton />
-      <UButton to="/login" variant="default" icon="i-lucide-key-round" />
+      <UButton
+        to="/login"
+        color="primary"
+        variant="soft"
+        icon="i-lucide-key-round"
+      />
+      <UButton to="/about" variant="default" icon="i-lucide-info" />
     </div>
     <!-- Main Layout -->
     <div class="flex-1 flex flex-col items-center px-4 sm:px-6 lg:px-8 py-6">
@@ -98,19 +104,19 @@
               <span class="text-xs">Bayar</span>
             </NuxtLink>
           </li>
-          <li>
-            <NuxtLink
-              to="/about"
-              class="flex flex-col items-center text-gray-600 dark:text-gray-300 hover:text-primary-600"
-              :class="{
-                'text-primary-600 dark:text-primary-600 font-semibold':
-                  $route.path === '/about',
-              }"
-            >
-              <UIcon name="i-lucide-info" class="size-5" />
-              <span class="text-xs">Tentang</span>
-            </NuxtLink>
-          </li>
+          <!-- <li> -->
+          <!--   <NuxtLink -->
+          <!--     to="/about" -->
+          <!--     class="flex flex-col items-center text-gray-600 dark:text-gray-300 hover:text-primary-600" -->
+          <!--     :class="{ -->
+          <!--       'text-primary-600 dark:text-primary-600 font-semibold': -->
+          <!--         $route.path === '/about', -->
+          <!--     }" -->
+          <!--   > -->
+          <!--     <UIcon name="i-lucide-info" class="size-5" /> -->
+          <!--     <span class="text-xs">Tentang</span> -->
+          <!--   </NuxtLink> -->
+          <!-- </li> -->
         </ul>
       </nav>
     </div>

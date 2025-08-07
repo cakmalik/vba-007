@@ -239,6 +239,10 @@ definePageMeta({
 const route = useRoute();
 const router = useRouter();
 
+if (route.query.code == "007") {
+  router.push(`/pay`);
+}
+
 import { h, onMounted, ref, computed, watch } from "vue";
 import { useDateFormat } from "@vueuse/core";
 import type { TableColumn } from "@nuxt/ui";
