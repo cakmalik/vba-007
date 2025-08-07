@@ -110,7 +110,19 @@ const getHouseNumbers = async () => {
   isLoading.value = false;
 };
 
-onMounted(getHouseNumbers);
+onMounted(() => {
+  const currentHost = window.location.host;
+  const currentPath =
+    window.location.pathname + window.location.search + window.location.hash;
+
+  // Redirect jika bukan dari domain utama
+  if (currentHost !== "rt007.site") {
+    const targetUrl = `https://rt007.site${currentPath}`;
+    window.location.href = targetUrl;
+  }
+
+  getHouseNumbers;
+});
 
 async function makePayment() {
   if (!selectedHouse.value) return;
