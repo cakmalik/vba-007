@@ -96,7 +96,7 @@ Pengurus RT 007.
 `
   const payload2 = createPayload(phoneNumber2, message2, data.code, invoiceUrl)
 
-  const message3 = `📌007# Notif Pembayaran #nama: ${data.profiles?.nickname} #periode: ${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}`
+  const message3 = `📌007# ${data.profiles?.nickname} (${data.house_number?.name}) #${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}`
   const payload3 = createPayload(phoneNumber3, message3, data.code, invoiceUrl)
 
   try {
