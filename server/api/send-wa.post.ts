@@ -91,8 +91,8 @@ Pengurus RT 007.
 🏘️ *Blok*: ${data.house_number?.name ?? '-'}  
 📅 *Periode*: ${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}  
 💰 *Nominal*: Rp ${Number(data.amount_override).toLocaleString('id-ID')}  
+💳 *Metode*: ${data.payment_methods?.name ?? '-'}
 📄 *Invoice*: ${invoiceUrl}
-💳 *Metode Pembayaran*: ${data.payment_methods?.name ?? '-'}
 `
   const payload2 = createPayload(phoneNumber2, message2, data.code, invoiceUrl)
 
