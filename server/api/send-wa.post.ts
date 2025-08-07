@@ -63,6 +63,7 @@ Terima kasih atas pembayaran iuran warga yang telah dilakukan. Berikut detail pe
 🏘️ *Blok*: ${data.house_number?.name ?? '-'}  
 📅 *Periode*: ${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}  
 💰 *Nominal*: Rp ${Number(data.amount_override).toLocaleString('id-ID')}  
+💳 *Metode Pembayaran*: ${data.payment_methods?.name ?? '-'}
 📄 *Invoice*: ${invoiceUrl}
 
 Kontribusi ini sangat membantu dalam menjaga kelancaran kegiatan dan operasional lingkungan RT kita tercinta.
@@ -79,7 +80,9 @@ Pengurus RT 007.
 
   // Pesan tembusan ke pengurus
   const tembusan = process.env.NOMER_NOTIF_TEMBUSAN ?? '6283853457929'
+  const tembusan2 = process.env.NOMER_NOTIF_TEMBUSAN_2 ?? '6281249178392'
   const phoneNumber2 = parsePhoneNumber(tembusan)
+  const phoneNumber3 = parsePhoneNumber(tembusan2)
 
   const message2 = `📌007#Tembusan
 ==================
@@ -88,12 +91,16 @@ Pengurus RT 007.
 🏘️ *Blok*: ${data.house_number?.name ?? '-'}  
 📅 *Periode*: ${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}  
 💰 *Nominal*: Rp ${Number(data.amount_override).toLocaleString('id-ID')}  
-📄 *Invoice*: ${invoiceUrl}`
-
+📄 *Invoice*: ${invoiceUrl}
+💳 *Metode Pembayaran*: ${data.payment_methods?.name ?? '-'}
+`
   const payload2 = createPayload(phoneNumber2, message2, data.code, invoiceUrl)
 
+  const message3 = `📌007# Notif Pembayaran #nama: ${data.profiles?.nickname} #periode: ${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}`
+  const payload3 = createPayload(phoneNumber3, message3, data.code, invoiceUrl)
+
   try {
-    const [res1, res2] = await Promise.all([
+    const [res1, res2, res3] = await Promise.all([
       fetch('https://api.fonnte.com/send', {
         method: 'POST',
         headers: {
@@ -108,10 +115,18 @@ Pengurus RT 007.
         },
         body: payload2,
       }),
+      fetch('https://api.fonnte.com/send', {
+        method: 'POST',
+        headers: {
+          Authorization: token,
+        },
+        body: payload3,
+      }),
     ])
 
     const response1 = await res1.json()
     const response2 = await res2.json()
+    const response3 = await res3.json()
 
     if (!response1.status || !response2.status) {
       return {
