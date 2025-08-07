@@ -112,7 +112,7 @@ const getHouseNumbers = async () => {
 
 onMounted(async () => {
   // jika production
-  if (process.client) {
+  if (process.env.NODE_ENV === "production") {
     const currentHost = window.location.host;
     const currentPath =
       window.location.pathname + window.location.search + window.location.hash;
@@ -127,6 +127,7 @@ onMounted(async () => {
   await getHouseNumbers();
 });
 
+const toast = useToast();
 async function makePayment() {
   if (!selectedHouse.value) return;
 
@@ -143,7 +144,16 @@ async function makePayment() {
     result.value = res;
 
     if (res.status != 200) {
-      alert(res.error);
+      toast.add({
+        title: "Upppss.. ",
+        description: "Sepertinya belum ada tagihan untukmu bro..",
+        icon: "i-lucide-wifi",
+        close: {
+          color: "primary",
+          variant: "outline",
+          class: "rounded-full",
+        },
+      });
     }
   } catch (error) {
     alert("Terjadi kesalahan saat membuat pembayaran");

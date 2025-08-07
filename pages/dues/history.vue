@@ -52,6 +52,15 @@
         class="w-full sm:w-1/2 md:w-1/3"
       />
 
+      <USelectMenu
+        v-model="selectedStatus"
+        :items="statusOptions"
+        option-attribute="label"
+        value-attribute="value"
+        placeholder="status"
+        class="w-full sm:w-1/3 md:w-1/4"
+      />
+
       <!-- Filter  -->
       <USelectMenu
         v-model="selectedBlock"
@@ -106,34 +115,6 @@
       variant="solid"
       class="fixed bottom-6 right-6 rounded-full px-4 py-4"
     />
-    <!-- <UDrawer -->
-    <!--   v-model:open="open" -->
-    <!--   :dismissible="false" -->
-    <!--   :handle="false" -->
-    <!--   :ui="{ header: 'flex items-center justify-between' }" -->
-    <!-- > -->
-    <!--   <UButton -->
-    <!--     label="Open" -->
-    <!--     color="neutral" -->
-    <!--     variant="subtle" -->
-    <!--     trailing-icon="i-lucide-chevron-up" -->
-    <!--   /> -->
-    <!---->
-    <!--   <template #header> -->
-    <!--     <h2 class="text-highlighted font-semibold">Drawer non-dismissible</h2> -->
-    <!---->
-    <!--     <UButton -->
-    <!--       color="neutral" -->
-    <!--       variant="ghost" -->
-    <!--       icon="i-lucide-x" -->
-    <!--       @click="open = false" -->
-    <!--     /> -->
-    <!--   </template> -->
-    <!---->
-    <!--   <template #body> -->
-    <!--     <Placeholder class="h-48" /> -->
-    <!--   </template> -->
-    <!-- </UDrawer> -->
 
     <UDrawer
       v-model:open="showForm"
@@ -282,6 +263,7 @@ const to = computed(() => from.value + pageSize - 1);
 const searchName = ref("");
 const selectedPeriod = ref(null);
 const selectedBlock = ref(null);
+const selectedStatus = ref(null);
 const totalAmount = ref(0);
 const totalUnpaidAmount = ref(0);
 
@@ -411,12 +393,13 @@ const {
   pending,
 } = await useAsyncData(
   () =>
-    `profile-dues-page-${page.value}-${debouncedSearchName.value}-${selectedPeriod.value?.value ?? selectedPeriod.value}-${selectedBlock.value?.value ?? selectedBlock.value}-${kodeRumah}`,
+    `profile-dues-page-${page.value}-${debouncedSearchName.value}-${selectedPeriod.value?.value ?? selectedPeriod.value}-${selectedBlock.value?.value ?? selectedBlock.value}-${selectedStatus.value?.value ?? selectedStatus.value}-${kodeRumah}`,
   async () => {
     const term = debouncedSearchName.value.trim().toLowerCase();
     const periodId = selectedPeriod.value?.value ?? selectedPeriod.value;
     console.log("periodId", periodId);
     const blockId = selectedBlock.value?.value;
+    const status = selectedStatus.value?.value ?? selectedStatus.value;
     // console.log("term", term);
     console.log("periodId", periodId);
     console.log("blockId baru", blockId);
@@ -446,6 +429,12 @@ const {
       if (blockId !== null && blockId !== "all") {
         query = query.eq("house_number.housing_block_id", blockId);
       }
+    }
+
+    console.log("status query", status);
+
+    if (status !== null && status.value !== null) {
+      query = query.eq("status", status);
     }
 
     const { data, error } = await query;
@@ -785,96 +774,17 @@ async function submitForm() {
   await refresh();
   showForm.value = false;
 }
-// async function submitForm() {
-//   const { id } = form.value;
-//   const payload = mapFormToPayload(form.value);
-//   // console.log("payload", payload);
-//   if (!isEdit.value) {
-//     payload.code = generateRandomCode();
-//   }
-//
-//   let res;
-//
-//   if (!isEdit.value) {
-//     res = await supabase.from("profile_dues").insert(payload).select().single();
-//   } else {
-//     res = await supabase
-//       .from("profile_dues")
-//       .update(payload)
-//       .eq("id", id!)
-//       .select()
-//       .single();
-//   }
-//
-//   if (res.error) {
-//     console.error(res.error);
-//     return;
-//   }
-//
-//   const dues = res.data;
-//
-//   // ✅ Tambah ke cash_flows hanya saat insert baru
-//   if (!isEdit.value && dues?.id) {
-//     const cashFlowPayload = {
-//       date: payload.due_date,
-//       type: "in",
-//       amount: payload.amount_override,
-//       description: `Pembayaran iuran bulan ${form.value.billing_period_id?.label} oleh ${selected_profile_id.value?.label}`,
-//       source: "iuran",
-//       category_id: null, // kalau belum ada kategori bisa diisi null
-//       recorded_by: payload.profile_id,
-//       reference_id: dues.id,
-//     };
-//
-//     const cashRes = await supabase
-//       .from("cash_flows")
-//       .insert(cashFlowPayload)
-//       .select()
-//       .single();
-//
-//     if (cashRes.error) {
-//       console.error("Gagal simpan ke cash_flows:", cashRes.error);
-//     }
-//   }
-//
-//   await refresh();
-//   showForm.value = false;
-// }
-
-// async function submitForm() {
-//   // const { id, ...payload } = form.value;
-//   const { id } = form.value;
-//   const payload = mapFormToPayload(form.value);
-//   console.log("payload", payload);
-//
-//   let res;
-//   if (!isEdit.value) {
-//     res = await supabase.from("profile_dues").insert(payload).select().single();
-//   } else {
-//     res = await supabase
-//       .from("profile_dues")
-//       .update(payload)
-//       .eq("id", id!)
-//       .select()
-//       .single();
-//   }
-//
-//   if (res.error) {
-//     console.error(res.error);
-//     return;
-//   }
-//
-//   await refresh();
-//   showForm.value = false;
-// }
-
 // Dropdown
 const profileOptions = ref([]);
 const paymentOptions = ref([]);
 const periodOptions = ref([]);
 const houseOptions = ref([]);
 const blockOptions = ref([]);
-
+const statusOptions = ref([
+  { label: "Semua", value: null },
+  { label: "Paid", value: "paid" },
+  { label: "Unpaid", value: "unpaid" },
+]);
 const roleName = ref<string | null>(null);
 
 const isTreasurer = computed(() => roleName.value === "treasurer");
@@ -1044,77 +954,6 @@ async function sendInvoiceViaWa(data: any) {
     showToast(false);
   }
 }
-// async function sendInvoiceViaWa(data: any) {
-//   const phoneNumber = parsePhoneNumber(data?.profiles?.phone_number ?? "");
-//   const invoiceUrl = `${window.location.origin}/invoice/${data?.code}`;
-//
-//   console.log("invoiceUrl", invoiceUrl);
-//
-//   if (!phoneNumber) {
-//     alert("Nomor telepon tidak tersedia");
-//     return;
-//   }
-//
-//   const payload = new FormData();
-//   payload.append("target", phoneNumber);
-//   // payload.append(
-//   //   "message",
-//   //   `Halo ${data.profiles?.full_name}, berikut adalah bukti iuran Anda bulan ${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}`,
-//   // );
-//
-//   payload.append(
-//     "message",
-//     `Assalamu’alaikum Wr. Wb.
-//
-// Terima kasih atas pembayaran iuran warga yang telah dilakukan. Berikut detail pembayarannya:
-//
-// 👤 *Nama*: *${data.profiles?.nickname}*
-// 🏘️ *Blok*: ${data.house_number?.name ?? "-"}
-// 📅 *Periode*: ${namaBulanDariAngka(data.billing_periods.month)} ${data.billing_periods.year}
-// 💰 *Nominal*: Rp ${Number(data.amount).toLocaleString("id-ID")}
-// 📄 *Invoice*: ${invoiceUrl}
-//
-// Kontribusi ini sangat membantu dalam menjaga kelancaran kegiatan dan operasional lingkungan RT kita tercinta.
-//
-// Semoga kebaikan Bapak/Ibu mendapatkan balasan yang lebih baik dari Allah SWT, serta diberikan kelapangan rezeki dan keberkahan.
-//
-// Wassalamu’alaikum Wr. Wb.
-// Hormat kami,
-// Pengurus RT 007.
-//
-// #Pesan ini otomatis, gausah bales gapapa.`,
-//   );
-//
-//   payload.append("url", invoiceUrl);
-//   payload.append("filename", `invoice-${data.code}.pdf`);
-//   payload.append("schedule", "0");
-//   payload.append("delay", "2");
-//   payload.append("countryCode", "62");
-//
-//   try {
-//     const response = await fetch("https://api.fonnte.com/send", {
-//       method: "POST",
-//       headers: {
-//         Authorization: "4JcyBTUcM3h1M86TzF3Q",
-//         // Authorization: config.fonnte,
-//       },
-//       body: payload,
-//     });
-//
-//     const res = await response.json();
-//     console.log("Res WA:", res);
-//     // console.log("token", config.fonnte);
-//
-//     if (res.status) {
-//       alert("Invoice berhasil dikirim via WhatsApp");
-//     } else {
-//       alert("Gagal mengirim WA: " + (res.reason || "Unknown error"));
-//     }
-//   } catch (error) {
-//     console.error("WA error:", error);
-//     alert("Terjadi kesalahan saat mengirim pesan.");
-//   }
-// }
 
 function parsePhoneNumber(raw: string): string {
   let phone = raw.replace(/\D/g, ""); // hapus semua non-digit
