@@ -53,6 +53,7 @@
       />
 
       <USelectMenu
+        v-if="isTreasurer"
         v-model="selectedStatus"
         :items="statusOptions"
         option-attribute="label"
@@ -263,7 +264,7 @@ const to = computed(() => from.value + pageSize - 1);
 const searchName = ref("");
 const selectedPeriod = ref(null);
 const selectedBlock = ref(null);
-const selectedStatus = ref(null);
+const selectedStatus = ref("paid");
 const totalAmount = ref(0);
 const totalUnpaidAmount = ref(0);
 
