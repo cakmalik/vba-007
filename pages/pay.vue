@@ -124,7 +124,7 @@ onMounted(async () => {
     }
   }
 
-  await getHouseNumbers;
+  await getHouseNumbers();
 });
 
 async function makePayment() {
