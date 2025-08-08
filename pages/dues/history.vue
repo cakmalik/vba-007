@@ -488,7 +488,7 @@ const columns: TableColumn[] = [
         ),
       ];
 
-      if (row.original.code && row.original.status == "paid") {
+      if (row.original.code && (row.original.status == "paid" || row.original.status == "PAID")) {
         buttons.push(
           h(
             UButton,
