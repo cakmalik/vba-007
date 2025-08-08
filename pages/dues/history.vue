@@ -178,7 +178,8 @@ async function fetchTotalAmount() {
   let query = supabase
     .from("profile_dues")
     .select("amount_override, profiles(nickname, full_name)")
-    .eq("status", "paid");
+    // .or("status.eq.paid,status.eq.PAID");
+    .ilike("status", "paid");
 
   const term = debouncedSearchName.value.trim();
 
@@ -676,8 +677,8 @@ const houseOptions = ref([]);
 const blockOptions = ref([]);
 const statusOptions = ref([
   { label: "Semua", value: null },
-  { label: "Paid", value: "paid" },
-  { label: "Unpaid", value: "unpaid" },
+  { label: "Lunas", value: "paid" },
+  { label: "Belum Lunas", value: "unpaid" },
 ]);
 const roleName = ref<string | null>(null);
 
