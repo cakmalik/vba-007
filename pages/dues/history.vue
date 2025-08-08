@@ -21,14 +21,14 @@
       <span class="text-base font-medium">Total Lunas</span>
       <span class="text-2xl font-bold tracking-wide">{{
         formatCurrency(totalAmount)
-        }}</span>
+      }}</span>
     </div>
     <div v-if="isTreasurer"
       class="mb-4 bg-red-100 dark:bg-red-700 text-red-800 dark:text-red-200 px-6 py-4 rounded-lg shadow-sm flex items-center justify-between">
       <span class="text-base font-medium">Total Belum Lunas (hanya angka perkiraan jika iuran 50rb semua)</span>
       <span class="text-2xl font-bold tracking-wide">{{
         formatCurrency(totalUnpaidAmount)
-        }}</span>
+      }}</span>
     </div>
 
     <!-- Filter Row -->
@@ -326,7 +326,8 @@ const {
     console.log("status query", status);
 
     if (status !== null && status.value !== null) {
-      query = query.eq("status", status);
+      // query = query.eq("status", status.toLowerCase());
+      query = query.ilike("status", `${status}`);
     }
 
     const { data, error } = await query;
@@ -487,7 +488,7 @@ const columns: TableColumn[] = [
         ),
       ];
 
-      if (row.original.code && row.original.status === "paid") {
+      if (row.original.code && row.original.status == "paid") {
         buttons.push(
           h(
             UButton,
