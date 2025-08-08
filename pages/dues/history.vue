@@ -16,190 +16,81 @@
   </div>
 
   <NuxtLayout :name="isTreasurer ? 'default' : 'public'" v-if="isReady">
-    <div
-      v-if="isTreasurer"
-      class="mb-4 bg-primary-100 dark:bg-primary-600 text-primary-700 dark:text-primary-200 px-6 py-4 rounded-lg shadow-sm flex items-center justify-between"
-    >
+    <div v-if="isTreasurer"
+      class="mb-4 bg-primary-100 dark:bg-primary-600 text-primary-700 dark:text-primary-200 px-6 py-4 rounded-lg shadow-sm flex items-center justify-between">
       <span class="text-base font-medium">Total Lunas</span>
       <span class="text-2xl font-bold tracking-wide">{{
         formatCurrency(totalAmount)
-      }}</span>
+        }}</span>
     </div>
-    <div
-      v-if="isTreasurer"
-      class="mb-4 bg-red-100 dark:bg-red-700 text-red-800 dark:text-red-200 px-6 py-4 rounded-lg shadow-sm flex items-center justify-between"
-    >
-      <span class="text-base font-medium"
-        >Total Belum Lunas (hanya angka perkiraan jika iuran 50rb semua)</span
-      >
+    <div v-if="isTreasurer"
+      class="mb-4 bg-red-100 dark:bg-red-700 text-red-800 dark:text-red-200 px-6 py-4 rounded-lg shadow-sm flex items-center justify-between">
+      <span class="text-base font-medium">Total Belum Lunas (hanya angka perkiraan jika iuran 50rb semua)</span>
       <span class="text-2xl font-bold tracking-wide">{{
         formatCurrency(totalUnpaidAmount)
-      }}</span>
+        }}</span>
     </div>
 
     <!-- Filter Row -->
-    <div
-      v-if="!kodeRumah"
-      class="flex justify-between flex-wrap items-center mb-4 gap-2"
-    >
+    <div v-if="!kodeRumah" class="flex justify-between flex-wrap items-center mb-4 gap-2">
       <!-- Pencarian Nama -->
 
-      <UInput
-        v-if="isTreasurer"
-        v-model="searchName"
-        placeholder="Cari nama atau panggilan..."
-        icon="i-heroicons-magnifying-glass"
-        class="w-full sm:w-1/2 md:w-1/3"
-      />
+      <UInput v-if="isTreasurer" v-model="searchName" placeholder="Cari nama atau panggilan..."
+        icon="i-heroicons-magnifying-glass" class="w-full sm:w-1/2 md:w-1/3" />
 
-      <USelectMenu
-        v-if="isTreasurer"
-        v-model="selectedStatus"
-        :items="statusOptions"
-        option-attribute="label"
-        value-attribute="value"
-        placeholder="status"
-        class="w-full sm:w-1/3 md:w-1/4"
-      />
+      <USelectMenu v-if="isTreasurer" v-model="selectedStatus" :items="statusOptions" option-attribute="label"
+        value-attribute="value" placeholder="status" class="w-full sm:w-1/3 md:w-1/4" />
 
       <!-- Filter  -->
-      <USelectMenu
-        v-model="selectedBlock"
-        :items="blockOptions"
-        option-attribute="label"
-        value-attribute="value"
-        placeholder="Filter Blok"
-        class="w-full sm:w-1/3 md:w-1/4"
-      />
+      <USelectMenu v-model="selectedBlock" :items="blockOptions" option-attribute="label" value-attribute="value"
+        placeholder="Filter Blok" class="w-full sm:w-1/3 md:w-1/4" />
       <!-- Filter Periode -->
-      <USelectMenu
-        v-model="selectedPeriod"
-        :items="periodOptions"
-        option-attribute="label"
-        value-attribute="value"
-        placeholder="Filter Periode"
-        class="w-full sm:w-1/3 md:w-1/4"
-      />
+      <USelectMenu v-model="selectedPeriod" :items="periodOptions" option-attribute="label" value-attribute="value"
+        placeholder="Filter Periode" class="w-full sm:w-1/3 md:w-1/4" />
     </div>
 
-    <UTable
-      :data="duesData"
-      :columns="columns"
-      :loading="pending"
-      loading-color="primary"
-    />
+    <UTable :data="duesData" :columns="columns" :loading="pending" loading-color="primary" />
 
-    <div
-      class="flex justify-between mt-4 items-center"
-      v-if="hasNextPage || page > 1"
-    >
-      <UButton
-        :disabled="page <= 1 || pending"
-        @click="prevPage"
-        icon="i-heroicons-chevron-left"
-      />
+    <div class="flex justify-between mt-4 items-center" v-if="hasNextPage || page > 1">
+      <UButton :disabled="page <= 1 || pending" @click="prevPage" icon="i-heroicons-chevron-left" />
       <span>Halaman {{ page }}</span>
-      <UButton
-        :disabled="!hasNextPage || pending"
-        @click="nextPage"
-        icon="i-heroicons-chevron-right"
-      />
+      <UButton :disabled="!hasNextPage || pending" @click="nextPage" icon="i-heroicons-chevron-right" />
     </div>
 
     <!-- Floating Add Button -->
-    <UButton
-      v-if="isTreasurer"
-      @click="create"
-      icon="i-lucide-plus"
-      size="2xl"
-      color="info"
-      variant="solid"
-      class="fixed bottom-6 right-6 rounded-full px-4 py-4"
-    />
+    <UButton v-if="isTreasurer" @click="create" icon="i-lucide-plus" size="2xl" color="info" variant="solid"
+      class="fixed bottom-6 right-6 rounded-full px-4 py-4" />
 
-    <UDrawer
-      v-model:open="showForm"
-      :dismissible="false"
-      :ui="{ header: 'flex items-center justify-between' }"
-    >
+    <UDrawer v-model:open="showForm" :dismissible="false" :ui="{ header: 'flex items-center justify-between' }">
       <template #header>
         <h2 class="text-highlighted font-semibold"></h2>
 
-        <UButton
-          color="neutral"
-          variant="ghost"
-          icon="i-lucide-x"
-          @click="showForm = false"
-        />
+        <UButton color="neutral" variant="ghost" icon="i-lucide-x" @click="showForm = false" />
       </template>
       <template #body>
         <div class="p-6 flex justify-center">
-          <UForm
-            :state="form"
-            @submit="submitForm"
-            class="flex flex-wrap gap-4 items-end"
-          >
-            <USelectMenu
-              :items="profileOptions"
-              icon="i-lucide-user"
-              v-model="selected_profile_id"
-              placeholder="Pilih Profile"
-              class="w-48"
-            />
+          <UForm :state="form" @submit="submitForm" class="flex flex-wrap gap-4 items-end">
+            <USelectMenu :items="profileOptions" icon="i-lucide-user" v-model="selected_profile_id"
+              placeholder="Pilih Profile" class="w-48" />
 
-            <USelectMenu
-              v-model="form.house_number_id"
-              :items="houseOptions"
-              label="No Rumah"
-              placeholder="Pilih no rumah"
-              class="w-full sm:w-1/2 md:w-1/4"
-            />
+            <USelectMenu v-model="form.house_number_id" :items="houseOptions" label="No Rumah"
+              placeholder="Pilih no rumah" class="w-full sm:w-1/2 md:w-1/4" />
 
-            <USelectMenu
-              v-model="form.billing_period_id"
-              :items="periodOptions"
-              option-attribute="label"
-              value-attribute="value"
-              label="Periode"
-              placeholder="Pilih periode"
-              class="w-full sm:w-1/2 md:w-1/4"
-            />
+            <USelectMenu v-model="form.billing_period_id" :items="periodOptions" option-attribute="label"
+              value-attribute="value" label="Periode" placeholder="Pilih periode" class="w-full sm:w-1/2 md:w-1/4" />
 
-            <USelectMenu
-              v-model="form.payment_method_id"
-              :items="paymentOptions"
-              option-attribute="label"
-              value-attribute="value"
-              label="Metode Pembayaran"
-              placeholder="Pilih metode"
-              class="w-full sm:w-1/2 md:w-1/4"
-            />
+            <USelectMenu v-model="form.payment_method_id" :items="paymentOptions" option-attribute="label"
+              value-attribute="value" label="Metode Pembayaran" placeholder="Pilih metode"
+              class="w-full sm:w-1/2 md:w-1/4" />
 
-            <USelectMenu
-              v-model="form.status"
-              :items="[
-                { label: 'Unpaid', value: 'unpaid' },
-                { label: 'Paid', value: 'paid' },
-              ]"
-              option-attribute="label"
-              value-attribute="value"
-              label="Status"
-              class="w-full sm:w-1/2 md:w-1/4"
-            />
+            <USelectMenu v-model="form.status" :items="[
+              { label: 'BELUM LUNAS', value: 'unpaid' },
+              { label: 'LUNAS', value: 'paid' },
+            ]" option-attribute="label" value-attribute="value" label="Status" class="w-full sm:w-1/2 md:w-1/4" />
 
-            <UInput
-              v-model="form.amount_override"
-              type="number"
-              label="Jumlah Override"
-              class="w-1/2 sm:w-1/2 md:w-1/4"
-            />
-            <UInput
-              v-model="form.due_date"
-              type="date"
-              label="Jatuh Tempo"
-              class="w-grow sm:w-1/2 md:w-1/4"
-              required
-            />
+            <UInput v-model="form.amount_override" type="number" label="Jumlah Override"
+              class="w-1/2 sm:w-1/2 md:w-1/4" />
+            <UInput v-model="form.due_date" type="date" label="Jatuh Tempo" class="w-grow sm:w-1/2 md:w-1/4" required />
 
             <div class="pt-4">
               <UButton type="submit" color="primary" block>Simpan</UButton>
@@ -506,7 +397,8 @@ const columns: TableColumn[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.getValue("status") as string;
+      const rawStatus = row.getValue("status") as string;
+      const status = rawStatus.toLowerCase();
       const color = {
         paid: "success" as const,
         unpaid: "error" as const,
