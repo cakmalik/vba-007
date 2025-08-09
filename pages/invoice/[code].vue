@@ -32,25 +32,25 @@
               <span class="text-gray-600">Nama Warga:</span>
               <span class="font-semibold text-gray-800">{{
                 form.namaWarga
-                }}</span>
+              }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">No. Rumah:</span>
               <span class="font-semibold text-gray-800">{{
                 form.noRumah
-                }}</span>
+              }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Tanggal Bayar:</span>
               <span class="font-semibold text-gray-800">{{
                 formattedTanggal
-                }}</span>
+              }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Metode:</span>
               <span class="font-semibold text-gray-800">{{
                 form.metodeBayar
-                }}</span>
+              }}</span>
             </div>
           </div>
 
@@ -189,7 +189,7 @@ payment_methods:payment_method_id (
   form.value = {
     namaWarga: data.profiles.nickname,
     noRumah: data.house_number.name,
-    tanggalBayar: data.paid_at,
+    tanggalBayar: data.paid_at ?? data.created_at,
     bulanBayar: `${data.billing_periods.year}-${String(data.billing_periods.month).padStart(2, "0")}`,
     nominalBayar: data.amount_override,
     metodeBayar: data.payment_methods.name,
