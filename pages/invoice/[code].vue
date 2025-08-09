@@ -1,8 +1,5 @@
 <template>
-  <div
-    v-if="form"
-    class="bg-gray-100 min-h-screen p-4 flex flex-col items-center"
-  >
+  <div v-if="form" class="bg-gray-100 min-h-screen p-4 flex flex-col items-center">
     <!-- Tombol simpan -->
     <div class="print:hidden self-end mb-4 z-10">
       <!-- <button -->
@@ -18,20 +15,11 @@
       <!-- Form Input -->
 
       <!-- Kartu Bukti -->
-      <div
-        id="wrapper"
-        class="relative bg-white p-4 overflow-hidden shadow rounded-xl"
-      >
-        <div
-          class="watermark absolute inset-0 pointer-events-none z-0 opacity-50"
-        ></div>
-        <div
-          id="receipt"
-          class="relative rounded-xl p-6 w-full text-sm font-medium border border-gray-300 z-10 bg-white/40"
-        >
-          <h2
-            class="text-center text-2xl font-bold mb-4 text-blue-800 tracking-wide"
-          >
+      <div id="wrapper" class="relative bg-white p-4 overflow-hidden shadow rounded-xl">
+        <div class="watermark absolute inset-0 pointer-events-none z-0 opacity-50"></div>
+        <div id="receipt"
+          class="relative rounded-xl p-6 w-full text-sm font-medium border border-gray-300 z-10 bg-white/40">
+          <h2 class="text-center text-2xl font-bold mb-4 text-blue-800 tracking-wide">
             Bukti Pembayaran Iuran Warga
           </h2>
           <div class="text-center text-xs text-gray-500 mb-4 leading-snug">
@@ -44,32 +32,30 @@
               <span class="text-gray-600">Nama Warga:</span>
               <span class="font-semibold text-gray-800">{{
                 form.namaWarga
-              }}</span>
+                }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">No. Rumah:</span>
               <span class="font-semibold text-gray-800">{{
                 form.noRumah
-              }}</span>
+                }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Tanggal Bayar:</span>
               <span class="font-semibold text-gray-800">{{
                 formattedTanggal
-              }}</span>
+                }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Metode:</span>
               <span class="font-semibold text-gray-800">{{
                 form.metodeBayar
-              }}</span>
+                }}</span>
             </div>
           </div>
 
           <div class="py-4">
-            <table
-              class="w-full text-left text-gray-700 border border-gray-200"
-            >
+            <table class="w-full text-left text-gray-700 border border-gray-200">
               <thead class="bg-blue-50 text-blue-800">
                 <tr class="border-b border-gray-200">
                   <th class="py-2 px-2">Bulan</th>
@@ -111,9 +97,7 @@
             Simpan bukti ini sebagai arsip pribadi.
           </div>
 
-          <div
-            class="mt-6 text-center text-xs text-blue-700 font-semibold italic"
-          >
+          <div class="mt-6 text-center text-xs text-blue-700 font-semibold italic">
             Mari kita ciptakan lingkungan Villa Bintaro Asri yang<br />
             aman, nyaman, tenteram, dan harmonis 🤝
           </div>
@@ -205,7 +189,7 @@ payment_methods:payment_method_id (
   form.value = {
     namaWarga: data.profiles.nickname,
     noRumah: data.house_number.name,
-    tanggalBayar: data.created_at,
+    tanggalBayar: data.paid_at,
     bulanBayar: `${data.billing_periods.year}-${String(data.billing_periods.month).padStart(2, "0")}`,
     nominalBayar: data.amount_override,
     metodeBayar: data.payment_methods.name,

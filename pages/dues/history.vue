@@ -21,14 +21,14 @@
       <span class="text-base font-medium">Total Lunas</span>
       <span class="text-2xl font-bold tracking-wide">{{
         formatCurrency(totalAmount)
-      }}</span>
+        }}</span>
     </div>
     <div v-if="isTreasurer"
       class="mb-4 bg-red-100 dark:bg-red-700 text-red-800 dark:text-red-200 px-6 py-4 rounded-lg shadow-sm flex items-center justify-between">
       <span class="text-base font-medium">Total Belum Lunas (hanya angka perkiraan jika iuran 50rb semua)</span>
       <span class="text-2xl font-bold tracking-wide">{{
         formatCurrency(totalUnpaidAmount)
-      }}</span>
+        }}</span>
     </div>
 
     <!-- Filter Row -->
@@ -587,6 +587,7 @@ function mapFormToPayload(form: any) {
     amount_override: form.amount_override,
     due_date: form.due_date,
     status: form.status?.value ?? form.status,
+    paid_at: new Date().toISOString(),
   };
 }
 
@@ -618,6 +619,7 @@ async function submitForm() {
         amount_override: payload.amount_override,
         due_date: payload.due_date,
         code: payload.code,
+        paid_at: payload.paid_at,
       })
       .eq("id", existingDues.id)
       .select()
