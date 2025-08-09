@@ -32,21 +32,22 @@
     </div>
 
     <!-- Filter Row -->
-    <div v-if="!kodeRumah" class="flex justify-between flex-wrap items-center mb-4 gap-2">
+    <div v-if="!kodeRumah" class="flex justify-between  flex-wrap items-center mb-4 gap-2">
       <!-- Pencarian Nama -->
+      <UInput v-if="isTreasurer" v-model="searchName" placeholder="Cari nama atau panggilan..." class="w-full sm:w-1/3"
+        icon="i-heroicons-magnifying-glass" />
 
-      <UInput v-if="isTreasurer" v-model="searchName" placeholder="Cari nama atau panggilan..."
-        icon="i-heroicons-magnifying-glass" class="w-full sm:w-1/2 md:w-1/3" />
+      <diV class="flex gap-2">
+        <USelectMenu v-if="isTreasurer" v-model="selectedStatus" :items="statusOptions" option-attribute="label"
+          value-attribute="value" placeholder="status" />
 
-      <USelectMenu v-if="isTreasurer" v-model="selectedStatus" :items="statusOptions" option-attribute="label"
-        value-attribute="value" placeholder="status" class="w-full sm:w-1/3 md:w-1/4" />
-
-      <!-- Filter  -->
-      <USelectMenu v-model="selectedBlock" :items="blockOptions" option-attribute="label" value-attribute="value"
-        placeholder="Filter Blok" class="w-full sm:w-1/3 md:w-1/4" />
-      <!-- Filter Periode -->
-      <USelectMenu v-model="selectedPeriod" :items="periodOptions" option-attribute="label" value-attribute="value"
-        placeholder="Filter Periode" class="w-full sm:w-1/3 md:w-1/4" />
+        <!-- Filter  -->
+        <USelectMenu v-model="selectedBlock" :items="blockOptions" option-attribute="label" value-attribute="value"
+          placeholder="Filter Blok" />
+        <!-- Filter Periode -->
+        <USelectMenu v-model="selectedPeriod" :items="periodOptions" option-attribute="label" value-attribute="value"
+          placeholder="Filter Periode" />
+      </diV>
     </div>
 
     <UTable :data="duesData" :columns="columns" :loading="pending" loading-color="primary" />
