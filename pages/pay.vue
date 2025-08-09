@@ -93,10 +93,8 @@ onMounted(async () => {
     const currentPath =
       window.location.pathname + window.location.search + window.location.hash;
 
-    if (currentHost == 'vba-007-hesa.vercel.app') return;
-
     // Redirect jika bukan dari domain utama
-    if (currentHost !== "rt007.site") {
+    if (currentHost !== "rt007.site" && currentHost !== "vba-007-hesa.vercel.app") {
       const targetUrl = `https://rt007.site${currentPath}`;
       window.location.href = targetUrl;
     }
