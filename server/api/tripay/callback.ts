@@ -114,6 +114,26 @@ export default defineEventHandler(async (event: H3Event) => {
         }))
       }
 
+      // ✅ Tambahkan ke cash_flows
+      console.log(`[Callback] Menambahkan data ke cash_flows untuk profile_dues ID: ${due.id}`)
+      const { error: cashflowError } = await supabase
+        .from('cash_flows')
+        .insert({
+          date: new Date().toISOString().split('T')[0],
+          type: 'in',
+          amount: detail.amount_override || detail.amount,
+          description: `Pembayaran iuran rumah ${detail.house_number?.name || ''}`,
+          source: 'iuran',
+          category_id: null,
+          recorded_by: detail.profiles?.id,
+          reference_id: due.id
+        })
+
+      if (cashflowError) {
+        console.error('[Callback] Gagal menambahkan cash_flows:', cashflowError)
+        // kita log error tapi tidak menghentikan proses
+      }
+
       if (is_sandbox == 'false') {
         console.log(`[Callback] Mengirim invoice via WA untuk profile_dues ID: ${due.id}`)
         await sendInvoiceViaWa(detail)
