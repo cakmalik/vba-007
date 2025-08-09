@@ -1,30 +1,15 @@
 <template>
-  <div
-    class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900"
-  >
+  <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
     <div class="w-full max-w-sm p-6 shadow-md space-y-4">
-      <h1 class="text-center text-2xl mb-14">007</h1>
-      <UButton
-        label="Masuk dengan Google"
-        block
-        icon="i-simple-icons-google"
-        color="primary"
-        variant="outline"
-        @click="signInWithGoogle"
-      />
 
       <div v-if="countdown > 0" class="text-sm text-gray-500 text-center">
         Please wait {{ countdown }}s before retrying.
       </div>
 
-      <div class="text-center">
-        <NuxtLink
-          to="/dashboard-public"
-          class="text-xs text-gray-500 hover:underline"
-        >
-          Lewati
-        </NuxtLink>
-      </div>
+      <UButton to="/dashboard-public" color="primary" variant="outline" block>
+        Warga
+      </UButton>
+      <UButton label="Admin" block color="gray" variant="ghost" @click="signInWithGoogle" />
     </div>
   </div>
 </template>
