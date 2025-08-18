@@ -140,6 +140,13 @@ const items = ref<NavigationMenuItem[][]>([
           to: "/cashflow",
           active: false,
         },
+        {
+          label: "Broadscast",
+          description: "Kelola Broadscast",
+          icon: "i-lucide-megaphone",
+          to: "/broadcast",
+          active: false,
+        }
       ],
       active: false,
     },
