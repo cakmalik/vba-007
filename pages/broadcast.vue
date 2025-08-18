@@ -1,4 +1,3 @@
-
 <template>
   <NuxtLayout>
   <div class="max-w-2xl mx-auto space-y-6 p-6">
@@ -26,14 +25,12 @@
         </div>
 
         <!-- Daftar nomor -->
-        <UFormGroup label="Nomor Warga (pisahkan dengan koma)">
           <UTextarea
             v-model="form.numbers"
             :rows="3"
             placeholder="contoh: 081234567890, 082233445566"
           class="w-full"
           />
-        </UFormGroup>
 
         <!-- Submit -->
         <div>

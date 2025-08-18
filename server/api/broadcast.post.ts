@@ -18,7 +18,7 @@ function createPayload(target: string, message: string): FormData {
   const payload = new FormData()
   payload.append('target', target)
   payload.append('message', message)
-  payload.append('delay', '2')
+  payload.append('delay', '60-120')
   payload.append('schedule', '0')
   payload.append('countryCode', '62')
   return payload
