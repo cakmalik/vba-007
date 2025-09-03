@@ -53,7 +53,8 @@ export default defineEventHandler(async (event) => {
     )
   `)
     .eq('house_number_id', house.id)
-    .eq('status', 'unpaid');
+    .eq('status', 'unpaid')
+    .gt('amount_override', 10000);
 
 
   if (duesError) {
@@ -61,7 +62,7 @@ export default defineEventHandler(async (event) => {
   }
 
   if (!unpaidDues || unpaidDues.length === 0) {
-    return { status: 400, error: 'Tidak ada tagihan bulan ini yang belum dibayar bro..' };
+    return { status: 400, error: 'Tidak ada tagihan nomer rumah ini, cek lainnya!' };
   }
 
   // Hitung total dari tagihan
