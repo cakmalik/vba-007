@@ -162,6 +162,7 @@ async function fetchReceiptData() {
     code,
     amount_override,
     created_at,
+    paid_at,
     billing_periods:billing_period_id (
       month,
       year
