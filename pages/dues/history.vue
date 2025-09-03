@@ -611,20 +611,21 @@ async function submitForm() {
 
   let res;
 
-  if (existingDues) {
-    // ✅ Kalau data sudah ada → update jadi paid
-    res = await supabase
-      .from("profile_dues")
-      .update({
-        status: "paid",
-        amount_override: payload.amount_override,
-        due_date: payload.due_date,
-        code: payload.code,
-        paid_at: payload.paid_at,
-      })
-      .eq("id", existingDues.id)
-      .select()
-      .single();
+if (existingDues) {
+  // ✅ Kalau data sudah ada → update jadi paid
+  res = await supabase
+    .from("profile_dues")
+    .update({
+      status: "paid",
+      amount_override: payload.amount_override,
+      due_date: payload.due_date,
+      code: payload.code,
+      paid_at: payload.paid_at,
+      payment_method_id: payload.payment_method_id, // 🔥 update metode pembayaran
+    })
+    .eq("id", existingDues.id)
+    .select()
+    .single();
   } else if (!isEdit.value) {
     // ✅ Insert baru
     res = await supabase.from("profile_dues").insert(payload).select().single();
