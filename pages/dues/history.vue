@@ -616,7 +616,7 @@ if (existingDues) {
   res = await supabase
     .from("profile_dues")
     .update({
-      status: "paid",
+      status: payload.status,
       amount_override: payload.amount_override,
       due_date: payload.due_date,
       code: payload.code,
