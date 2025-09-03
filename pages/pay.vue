@@ -39,7 +39,7 @@
           class="mx-auto w-60 h-60 rounded border" />
 
         <!-- BUTTON DOWNLOAD -->
-        <UButton @click="downloadQr" color="gray"> Download QR Code </UButton>
+<UButton trailing-icon="i-lucide-arrow-right" size="md" color="primary" variant="solid" @click="downloadQr">Download QR CODE</UButton>
 
         <!-- INSTRUCTIONS -->
         <div v-if="result.data.data.instructions?.length" class="text-left max-w-md mx-auto space-y-4">
