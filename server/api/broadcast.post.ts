@@ -40,7 +40,7 @@ export default defineEventHandler(async (event: H3Event) => {
     return { status: false, reason: 'Data tidak lengkap' }
   }
 
-  const token = process.env.NUXT_FONNTE
+  const token = process.env.NUXT_FONNTE2
   if (!token) {
     return { status: false, reason: 'Token Fonnte tidak tersedia.' }
   }
