@@ -1,5 +1,15 @@
 <template>
-  <NuxtLayout name="public">
+  <NuxtLayout name="public" v-show="transferOnly">
+    <p class="text-center text-gray-700 dark:text-white">
+Pembayaran hanya bisa dilakukan dengan metode Transfer ke
+<span class="bg-black rounded-md p-3 py-1 dark:text-yellow-500 text-yellow-500" @click="copyToClipboard('2001140673')">
+      2001140673</span>
+A/N Much Sohib <span class="bg-black rounded-md p-3 py-1 dark:text-yellow-500 text-yellow-500">
+        BCA
+      </span>
+    </p>
+  </NuxtLayout>
+  <NuxtLayout name="public" v-show="!transferOnly">
     <div class="max-w-5xl mx-auto text-center mt-20 space-y-4 space-x-2">
       <USelectMenu v-model="selectedHouse" :items="houseOptions" label="No Rumah" placeholder="Cari Nomer Rumah"
         :search-input="{
@@ -182,5 +192,21 @@ function downloadQr() {
   window.open(apiUrl, "_blank");
 }
 
-
+function copyToClipboard(qrUrl: string) {
+  navigator.clipboard.writeText(qrUrl);
+  toast.add({
+    title: "Disalin!",
+    description: "Nomer Rekening berhasil disalin.",
+    icon: "i-lucide-check",
+    close: {
+      color: "primary",
+      variant: "outline",
+      class: "rounded-full",
+    },
+  });
+}
+const config = useRuntimeConfig()
+const transferOnly = computed(() => {
+  return config.public.transferOnly
+})
 </script>

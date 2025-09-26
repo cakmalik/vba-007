@@ -1,15 +1,18 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  // https://nuxt.com/docs/api/configuration/nuxt-config
   runtimeConfig: {
     apiSecret: '123',
     fonnte: process.env.fonnte,
+    TRANSFER_ONLY: process.env.TRANSFER_ONLY || true,
     // supabaseUrl: '',
     // supabaseKey: '',
 
     public: {
       supabaseRedirectUrl: process.env.SUPABASE_REDIRECT_URL || 'http://localhost:3000/confirm',
       apiBase: '/api',
-      emailRedirect: 'http://localhost:3000/confirm'
+      emailRedirect: 'http://localhost:3000/confirm',
+      transferOnly: process.env.NUXT_PUBLIC_TRANSFER_ONLY || true
     }
   },
   compatibilityDate: '2025-05-15',
